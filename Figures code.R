@@ -1,17 +1,6 @@
----
-  title: "Functional diversity figures"
-output: html_notebook
----
-  
-  Set WD
-```{r, setup, include=FALSE}
-knitr::opts_knit$set(root.dir = "/Users/Zoey/Dropbox/Dragonflies/Zoey/Top-pred-and-func-div")
-```
 
-```{r}
 library(tidyverse)
 library(ggpubr)
-
 
 
 #Data sets for the observed diversity results
@@ -39,11 +28,10 @@ spbeta.rand.avg <- read.csv("Data/spbeta.rand.avg.csv")%>%
 tempbeta.rand.avg <- read.csv("Data/tempbeta.rand.avg.csv")%>%
   mutate(dompred = factor(dompred),
          season = fct_relevel(season, c("W_Sp", "Sp_Su", "Su_F", "F_W")))
-```
 
-Specifications for plots
 
-```{r}
+#Specifications for plots
+
 #colorblind friendly palet 
 cbPalette <- c("#CC79A7", "#E69F00", "#009E73","#56B4E9", "grey35")
 
@@ -55,11 +43,9 @@ Textsize <- theme(legend.text = element_text(size = 12),
                   axis.text.y = element_text(size = 12))
 
 
-```
 
-Alpha plot
+#Alpha diversity plot
 
-```{r}
 #I'm going to represent predator means as horizontal lines rather than points. Here's a go at that
 
 
@@ -83,10 +69,8 @@ Alpha.plot <- FDis.emmeans%>%
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
   Textsize
-```
 
-Spatial beta plot
-```{r}
+#Spatial beta plot
 
 Spatial.plot <- Spatial.emmeans%>%
   filter(season != "Mean") %>%
@@ -110,11 +94,8 @@ Spatial.plot <- Spatial.emmeans%>%
   Textsize
 
 
-```
+#Temporal beta plot
 
-Temporal beta plot
-
-```{r}
 Temporal.plot <- Temporal.emmeans%>%
   filter(season != "Mean")%>%
   data.frame()%>%
@@ -136,9 +117,8 @@ Temporal.plot <- Temporal.emmeans%>%
   theme(axis.title.x = element_text(size = 14),
         axis.text.x = element_text(size = 12)) +
   Textsize
-```
 
-```{r, fig.width = 7, fig.height = 10}
+
 #I'm going to have one legend for the alpha and spatial beta plots and a separate one for the temporal beta. I think the best way to do this is to first make a combined plot for the first two sharing a legend, then combine that one with the temporal plot
 
 Alpha.spatial.plot <- ggarrange(Alpha.plot, Spatial.plot, common.legend = T, legend = "right", ncol = 1)
@@ -146,11 +126,13 @@ Alpha.spatial.plot <- ggarrange(Alpha.plot, Spatial.plot, common.legend = T, leg
 #Add the temporal plot
 ggarrange(Alpha.spatial.plot, Temporal.plot, common.legend = F, ncol = 1, heights = c(2,1))
 ggsave("Figures/Diversity.combined.figure.tiff", width = 7.33, height = 9.19)
-```
 
-Randomized alpha plot
 
-```{r}
+####Randomization data plots
+
+
+#Randomized alpha plot
+
 #The randomized only includes salamander, sunfish, and bass ponds because we drew five ponds in each randomization to match the invertebrate sample size which means each randomization would give the same invertebrate values. For the figure I'll graph the observed invert mean + SE beside the resampled mean + SE for the other three pond types.
 
 
@@ -176,10 +158,9 @@ Alpha.rand.plot <- FDis.emmeans%>%
         axis.ticks.x = element_blank()) +
   Textsize
 
-```
 
-Randomized spatial plot
-```{r}
+#Randomized spatial plot
+
 
 #The randomized only includes salamander, sunfish, and bass ponds because we drew five ponds in each randomization to match the invertebrate sample size which means each randomization would give the same invertebrate values. For the figure I'll graph the observed invert mean + SE beside the resampled mean + SE for the other three pond types.
 
@@ -206,10 +187,9 @@ Spatial.rand.plot <- Spatial.emmeans%>%
         axis.ticks.x = element_blank()) +
   Textsize
 
-```
 
-Randomized temporal plot
-```{r}
+#Randomized temporal plot
+
 
 #The randomized only includes salamander, sunfish, and bass ponds because we drew five ponds in each randomization to match the invertebrate sample size which means each randomization would give the same invertebrate values. For the figure I'll graph the observed invert mean + SE beside the resampled mean + SE for the other three pond types.
 
@@ -239,10 +219,8 @@ Temporal.rand.plot <- Temporal.emmeans%>%
         axis.text.x = element_text(size = 12)) +
   Textsize
 
-```
 
-Combine the randomized plots
-```{r, fig.width = 7, fig.height = 10}
+#Combine the randomized plots
 #I'm going to have one legend for the alpha and spatial beta plots and a separate one for the temporal beta. I think the best way to do this is to first make a combined plot for the first two sharing a legend, then combine that one with the temporal plot
 
 Alpha.spatial.rand.plot <- ggarrange(Alpha.rand.plot, Spatial.rand.plot, common.legend = T, legend = "right", ncol = 1)
@@ -250,4 +228,3 @@ Alpha.spatial.rand.plot <- ggarrange(Alpha.rand.plot, Spatial.rand.plot, common.
 #Add the temporal plot
 ggarrange(Alpha.spatial.rand.plot, Temporal.rand.plot, common.legend = F, ncol = 1, heights = c(2,1))
 ggsave("Figures/Diversity.rand.combined.figure.tiff", width = 7.33, height = 9.19)
-```
