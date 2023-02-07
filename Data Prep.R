@@ -162,7 +162,5 @@ Pondtraitmeans <- Finaldata%>%
   unite("ID",c(dompred, time, Pondnum),sep=".",remove=T)
 
 
-write.csv(Pondtraitmeans, "Data/Pondtraitmeans.csv", row.names = F)
-
-```
+#write.csv(Pondtraitmeans, "Data/Pondtraitmeans.csv", row.names = F)
 
