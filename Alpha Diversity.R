@@ -172,8 +172,6 @@ Alpha.plot <- FDis.season.emmeans%>%
 
 ggsave("Figures/Alpha_dompred_plot.tiff")
 
-saveRDS(Alpha.plot, "Figures/Alpha_dompred_plot.rds")
-
 #Dompred x season, season on x-axis
 
 #Here's an alternate FDis line graph by season with season on x axis
