@@ -1,14 +1,3 @@
----
-  title: "PCoA and Trait Space Figure"
-output: html_notebook
----
-  
-  Set WD
-```{r, setup, include=FALSE}
-knitr::opts_knit$set(root.dir = "/Users/Zoey/Dropbox/Dragonflies/Zoey/Top-pred-and-func-div")
-```
-
-```{r}
 library(tidyverse)
 library(ape)
 library(cluster)
@@ -25,11 +14,9 @@ Finaldata$dompred <- factor(Finaldata$dompred, levels = c("N","S","G","B"))
 Finaldata$season <- factor(Finaldata$season, levels = c("W","Sp","Su","F"))
 
 
-```
+#First I'll conduct a PCoA on the species traits. PCoA was chosen because it's the method used in calculating FDis
 
-First I'll conduct a PCoA on the species traits. PCoA was chosen because it's the method used in calculating FDis
 
-```{r}
 #Need a distance matrix first
 speciesdist <- daisy(Traitaverage, metric = "gower", stand = T)
 PCOA <- pcoa(speciesdist, correction = "none")
@@ -59,10 +46,9 @@ Averageordi2 <- Averageordi%>%
   dplyr::summarise(meanAxis1 = mean(meanAxis1), meanAxis2 = mean(meanAxis2), count = n())
 
 
-```
 
-I found a function online for extracting and plotting the vector loadings from a PCOA. Got it at https://gist.github.com/Rekyt/ee15330639f8719d87aebdb8a5b095d4
-```{r}
+#I found a function online for extracting and plotting the vector loadings from a PCOA. Got it at https://gist.github.com/Rekyt/ee15330639f8719d87aebdb8a5b095d4
+
 compute_arrows = function(given_pcoa, trait_df) {
   
   # Keep only quantitative or ordinal variables
@@ -97,11 +83,11 @@ trait_loadings <- compute_arrows(PCOA, data.frame(apply(Traitaverage, 2, scale, 
 #Isolate the loadings in a data set and make the rownames (the traits) a column
 arrows_df = as.data.frame(trait_loadings$U)%>%
   rownames_to_column("variable")
-```
 
-Now plots! First I'll create the PCOA loadings to be inserted as insets, then I'll make the traitspace figures
 
-```{r}
+#Now plots! First I'll create the PCOA loadings to be inserted as insets, then I'll make the traitspace figures
+
+
 #Colorblind friendly palette for graphing
 cbPalette <- c("#CC79A7", "#E69F00", "#009E73","#56B4E9")
 cbPalette2 <- c("#D55E00", "#CC79A7", "#A19F31","#D95EE3")
@@ -198,12 +184,12 @@ Averageordi2%>%
 
 #Un-comment to save
 #ggsave("Figures/Traitspace.dompred.season.tiff")
-```
 
 
-Plot averages of single traits to see if the vector loadings make sense. I'm going to try having one figure with separate panels for each trait. I'll need to convert the data to long form, group by pred and trait, and then summarize to calculate mean and SE. This will go in the supplement so I'm going to have separate figures for each season.
 
-```{r}
+#Plot averages of single traits to see if the vector loadings make sense. I'm going to try having one figure with separate panels for each trait. I'll need to convert the data to long form, group by pred and trait, and then summarize to calculate mean and SE. This will go in the supplement so I'm going to have separate figures for each season.
+
+
 
 #Convert data to long form
 Traitslong <- Finaldata%>%
@@ -263,6 +249,6 @@ PlotTraits("F") +
   theme(plot.title = element_text(size = 20, face = "bold"))
 
 ggsave("Figures/traits.fall.tiff", width = 10.19, height = 9.19)
-```
+
 
 
