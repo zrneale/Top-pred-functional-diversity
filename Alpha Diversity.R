@@ -108,16 +108,9 @@ FDis.all.emmeans <- as.data.frame(FDis.all.posthoc$emmeans)%>%
 
 #Save emmeans for graphing in a separate workbook
 FDis.dompred.emmeans%>%
+  mutate(season = "Mean")%>%
   rbind(FDis.season.emmeans)%>%
   write.csv("Data/FDis.emmeans.csv")
-
-write.csv(FDis.dompred.emmeans, "Data/FDis.dompred.emmeans.csv")
-write.csv(FDis.season.emmeans, "Data/FDis.season.emmeans.csv")
-write.csv(FDis.all.emmeans, "Data/FDis.all.emmeans.csv")
-
-
-
-
 
 
 #Colorblind friendly palette for graphing
@@ -241,8 +234,8 @@ ggsave("Figures/Alpha_all_plot.tiff")
 #Run the analysis with resampled data to make sure sample sizes aren't influencing our results
 
 #FDis resampling
-n <-5 #number of ponds to draw from each predator type
-numsim <- 500 #number of simulations to run
+n <-3 #number of ponds to draw from each predator type
+numsim <- 1000 #number of simulations to run
 FDis.rand <- tibble(Pondnum = factor(),
                     dompred = factor(levels = c("S","G","B")),
                     FDis = numeric(),
@@ -250,10 +243,10 @@ FDis.rand <- tibble(Pondnum = factor(),
                     season = factor(levels = c("W","Sp","Su","F")),
                     sim = NA) #dataframe to insert the mean distance values from randomizations
 
-#I'm only randomizing salamander, sunfish, and bass ponds by sampling 5 ponds within each type. 5 is the sample size of invert ponds, so the randomized values will always be the same
+#Run the randomization. 
 for(i in 1:numsim){
   samponds <- DomPredata%>%
-    filter(dompred != "O", dompred != "N")%>%
+    filter(dompred != "O")%>%
     group_by(dompred)%>%
     sample_n(n)
   
@@ -264,15 +257,13 @@ for(i in 1:numsim){
     rbind(FDis.rand)
 }
 
-#Calculate the average values for plotting
-FDis.rand.avg <- FDis.rand%>%
-  group_by(dompred, season)%>%
-  summarise(avgFDis = mean(FDis), 
-            lower.CL = quantile(FDis, probs = 0.025),
-            upper.CL = quantile(FDis, probs = 0.975))
 
 
-write.csv(FDis.rand.avg, "Data/FDis.rand.avg.csv", row.names = F)
+#Run if need to save the randomized values
+write.csv(FDis.rand, "Data/FDis.rand.csv", row.names = F)
+
+#Run if file already saved and need to load it
+#FDis.rand <- read.csv("Data/FDis.rand")
 
 #Graph distribution of mean values by dompred
 FDis.rand%>%
