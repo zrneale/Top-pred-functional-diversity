@@ -19,22 +19,24 @@ Temporal.emmeans <- read.csv("Data/Temporal.emmeans.csv")%>%
 
 #Data sets for the randomized diversity results
 
-FDis.rand.avg <- read.csv("Data/FDis.rand.avg.csv")%>%
-  mutate(dompred = factor(dompred))
+FDis.rand <- read.csv("Data/FDis.rand.csv")%>%
+  mutate(dompred = fct_relevel(dompred, c("N", "S", "G", "B")),
+         season = fct_relevel(season, c("W", "Sp", "Su", "F")))
 
-spbeta.rand.avg <- read.csv("Data/spbeta.rand.avg.csv")%>%
-  mutate(dompred = factor(dompred))
+spbeta.rand <- read.csv("Data/spbeta.rand.csv")%>%
+  mutate(dompred = fct_relevel(dompred, c("N", "S", "G", "B")),
+         season = fct_relevel(season, c("W", "Sp", "Su", "F")))
 
-tempbeta.rand.avg <- read.csv("Data/tempbeta.rand.avg.csv")%>%
-  mutate(dompred = factor(dompred),
+tempbeta.rand <- read.csv("Data/tempbeta.rand.csv")%>%
+  mutate(dompred = fct_relevel(dompred, c("N", "S", "G", "B")),
          season = fct_relevel(season, c("W_Sp", "Sp_Su", "Su_F", "F_W")))
 
 
 #Specifications for plots
 
 #colorblind friendly palet 
-cbPalette <- c("#CC79A7", "#E69F00", "#009E73","#56B4E9", "grey35")
-
+seasonPalette <- c('#EE6677', '#228833', '#4477AA', '#CCBB44', "grey35")
+predPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442")
 #Fonts. I'll only specify legend and y axis since only the bottom plot (temporal) will have x axis labels
 
 Textsize <- theme(legend.text = element_text(size = 12),
@@ -56,15 +58,12 @@ Alpha.plot <- FDis.emmeans%>%
   geom_line(aes(group = season), position=position_dodge(width=0.5),size=0.5) +
   geom_linerange(aes(ymin=lower.CL, ymax= upper.CL),
                  position=position_dodge(width=0.5),size=0.5) +
-  stat_summary(fun = "mean", geom = "segment", 
-               aes(xend = ..x.. - 0.25, yend = ..y..), color = "black") +
-  stat_summary(fun = "mean", geom = "segment", 
-               aes(xend = ..x.. + 0.25, yend = ..y..), color = "black") +
+  stat_summary(fun = "mean", geom = "point", color = "black", alpha = 0.5, shape = 17, size = 5, show.legend = T) + 
   theme_classic() +
   labs(x = "Top predator",
        y = paste("FDis\n(α diversity)"),
        color = "Season")+
-  scale_color_manual(values=cbPalette, labels = c("Winter", "Spring", "Summer", "Fall")) +
+  scale_color_manual(values=seasonPalette, labels = c("Winter", "Spring", "Summer", "Fall")) +
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
@@ -87,7 +86,7 @@ Spatial.plot <- Spatial.emmeans%>%
   labs(x = "Top Predator", 
        y = paste("Spatial Dissimilarity\n(β diversity)"),
        color = "Season") +
-  scale_color_manual(values=cbPalette, labels = c("Winter", "Spring", "Summer", "Fall")) +
+  scale_color_manual(values=seasonPalette, labels = c("Winter", "Spring", "Summer", "Fall")) +
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
@@ -112,7 +111,7 @@ Temporal.plot <- Temporal.emmeans%>%
   labs(x = "Top Predator", 
        y = paste("Temporal Dissimilarity\n(β diversity)"),
        color = "Season") +
-  scale_color_manual(values=cbPalette) +
+  scale_color_manual(values=seasonPalette) +
   scale_x_discrete(labels=c("Invertebrate","Salamander","Sunfish","Bass")) +
   theme(axis.title.x = element_text(size = 14),
         axis.text.x = element_text(size = 12)) +
@@ -121,6 +120,7 @@ Temporal.plot <- Temporal.emmeans%>%
 
 #I'm going to have one legend for the alpha and spatial beta plots and a separate one for the temporal beta. I think the best way to do this is to first make a combined plot for the first two sharing a legend, then combine that one with the temporal plot
 
+library(ggpubr)
 Alpha.spatial.plot <- ggarrange(Alpha.plot, Spatial.plot, common.legend = T, legend = "right", ncol = 1)
 
 #Add the temporal plot
@@ -138,11 +138,31 @@ ggsave("Figures/Diversity.combined.figure.tiff", width = 7.33, height = 9.19)
 
 #Combine the randomized mean values with the observed values for invert ponds and make the plot. 
 
-Alpha.rand.plot <- FDis.emmeans%>%
-  filter(dompred == "N", season != "Mean")%>%
-  rename(avgFDis = emmean)%>%
-  dplyr::select(dompred, season, avgFDis, lower.CL, upper.CL)%>%
-  rbind(FDis.rand.avg)%>%
+FDis.rand%>%
+  group_by(dompred, season, sim)%>%
+  dplyr::summarise(FDis = mean(FDis))%>%
+  ggplot(aes(x = dompred, y = FDis, color = dompred)) +
+  geom_violin(aes(fill = dompred)) +
+  theme_classic() +
+  scale_color_manual(values=cbPalette) +
+  scale_fill_manual(values = cbPalette) +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
+  #ggtitle("Resampled alpha Dissimilarity") +
+  labs(x = "Predator", 
+       y = "Mean FDis") +
+  facet_grid(.~season) +
+  labs(x = "Top Predator", 
+       y = paste("FDis\n(α diversity) +/- CI")) +
+  scale_color_manual(values=cbPalette, labels = c("Winter", "Spring", "Summer", "Fall")) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  Textsize
+
+
+Alpha.rand.plot <- FDis.rand%>%
+  group_by(dompred, season, sim)%>%
+  dplyr::summarise(FDis = mean(FDis))%>%
   ggplot(aes(x = dompred, y = avgFDis, color = season), data = .) +
   geom_point(position = position_dodge(width = 0.5), size = 5) +
   #geom_line(aes(group = season), position = position_dodge(width = 0.5), size = 0.5) +
@@ -150,7 +170,7 @@ Alpha.rand.plot <- FDis.emmeans%>%
                  position = position_dodge(width = 0.5), size = 0.5) +
   theme_classic() +
   labs(x = "Top Predator", 
-       y = paste("FDis\n(α diversity) +/- CI"),
+       y = paste("FDis\n(α diversity) ± CI"),
        color = "Season") +
   scale_color_manual(values=cbPalette, labels = c("Winter", "Spring", "Summer", "Fall")) +
   theme(axis.title.x = element_blank(),
