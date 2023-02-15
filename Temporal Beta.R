@@ -199,10 +199,10 @@ ggsave("Figures/Temporal.all.plot.tiff", width=8)
 #Upload 
 DomPredata<-read.csv("Data/PredType2.csv", header=T) #Data set of the top predators in each pond
 
-n <-5 #number of ponds to draw from each predator type
-numsim <- 500 #number of simulations to run
+n <-3 #number of ponds to draw from each predator type
+numsim <- 1000 #number of simulations to run
 tempbeta.rand <- tibble(Pondnum = factor(),
-                        dompred = factor(levels = c("S","G","B")),
+                        dompred = factor(levels = c("N", "S","G","B")),
                         time1 = numeric(),
                         time2 = numeric(),
                         distance = numeric(),
@@ -214,7 +214,7 @@ tempbeta.rand <- tibble(Pondnum = factor(),
 #For loop to perform the randomizations
 for(i in 1:numsim){
   samponds <- DomPredata%>%
-    filter(dompred != "O", dompred != "N")%>%
+    filter(dompred != "O")%>%
     group_by(dompred)%>%
     sample_n(n)
   
@@ -225,13 +225,9 @@ for(i in 1:numsim){
     rbind(tempbeta.rand)
 }
 
-tempbeta.rand.avg <- tempbeta.rand%>%
-  group_by(dompred, season)%>%
-  summarise(avgdist = mean(distance), 
-            asymp.LCL = quantile(distance, probs = 0.025),
-            asymp.UCL = quantile(distance, probs = 0.975))
 
-#write.csv(tempbeta.rand.avg, "Data/tempbeta.rand.avg.csv", row.names = F)
+
+#write.csv(tempbeta.rand, "Data/tempbeta.rand.csv", row.names = F)
 
 #Dompred main effect
 tempbeta.rand%>%

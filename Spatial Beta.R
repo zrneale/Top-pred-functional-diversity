@@ -29,7 +29,7 @@ Allpairdist <- Distmat%>%
   mutate(dompred2 = factor(dompred2, levels = c("N", "S", "G", "B")))%>% #reorder predator levels for graphing later
   mutate(dompred1 = factor(dompred1, levels = c("N", "S", "G", "B")))
 
-#write.csv(Allpairdist, "Data/Allpairdist.csv", row.names = F) 
+write.csv(Allpairdist, "Data/Allpairdist.csv", row.names = F) 
 
 #From the all-pairwise dataset, the comparisons between ponds of the same predator type, year, and season were selected for the spatial beta diversity analysis
 
@@ -41,6 +41,7 @@ Spatialbeta <- Allpairdist %>%
   mutate_at(vars(year), as.factor)%>%
   dplyr::select(-c("dompred2","time2"))%>%
   mutate(season = factor(season, levels = c("W", "Sp", "Su", "F"))) #Reorder season levels for graphing
+
 #Some exploratory data visualization.  
 
 Spatialbeta %>%
@@ -81,71 +82,9 @@ plot(Spatialbeta$season, resid(Spatialbetalmer))
 descdist(Spatialbeta$distance)
 
 
-#Looks like beta or gamma.  Let's try beta first.
+#Looks like beta or gamma.  Going with gamma
 
 
-SpatialbetaBetareg <- betareg(distance ~ dompred + year + season + dompred:year + dompred:season +
-                                (1|pondnum1) + (1|pondnum2),
-                              transform(Spatialbeta,distance = distance + 0.0001))
-plot(SpatialbetaBetareg)
-
-
-
-#Got an error that contrasts can only be applied to factors with 2 or more levels.  Here's a function I found online that can possibly shed light
-#Couldn't get this to work
-#DO NOT RUN
-
-debug_contr_error <- function (dat, subset_vec = NULL) {
-  if (!is.null(subset_vec)) {
-    ## step 0
-    if (mode(subset_vec) == "logical") {
-      if (length(subset_vec) != nrow(dat)) {
-        stop("'logical' `subset_vec` provided but length does not match `nrow(dat)`")
-      }
-      subset_log_vec <- subset_vec
-    } else if (mode(subset_vec) == "numeric") {
-      ## check range
-      ran <- range(subset_vec)
-      if (ran[1] < 1 || ran[2] > nrow(dat)) {
-        stop("'numeric' `subset_vec` provided but values are out of bound")
-      } else {
-        subset_log_vec <- logical(nrow(dat))
-        subset_log_vec[as.integer(subset_vec)] <- TRUE
-      } 
-    } else {
-      stop("`subset_vec` must be either 'logical' or 'numeric'")
-    }
-    dat <- base::subset(dat, subset = subset_log_vec)
-  } else {
-    ## step 1
-    dat <- stats::na.omit(dat)
-  }
-  if (nrow(dat) == 0L) warning("no complete cases")
-  ## step 2
-  var_mode <- sapply(dat, mode)
-  if (any(var_mode %in% c("complex", "raw"))) stop("complex or raw not allowed!")
-  var_class <- sapply(dat, class)
-  if (any(var_mode[var_class == "AsIs"] %in% c("logical", "character"))) {
-    stop("matrix variables with 'AsIs' class must be 'numeric'")
-  }
-  ind1 <- which(var_mode %in% c("logical", "character"))
-  dat[ind1] <- lapply(dat[ind1], as.factor)
-  ## step 3
-  fctr <- which(sapply(dat, is.factor))
-  if (length(fctr) == 0L) warning("no factor variables to summary")
-  ind2 <- if (length(ind1) > 0L) fctr[-ind1] else fctr
-  dat[ind2] <- lapply(dat[ind2], base::droplevels.factor)
-  ## step 4
-  lev <- lapply(dat[fctr], base::levels.default)
-  nl <- lengths(lev)
-  ## return
-  list(nlevels = nl, levels = lev)
-}
-debug_contr_error(Spatialbeta)
-
-
-
-#Everything has more than 2 levels.  Don't know what to do.
 
 
 #Here's the glm with gamma function.  Since the response has zero's, I'll add a small value to them.
@@ -186,7 +125,7 @@ cbPalette <- c("#CC79A7", "#E69F00", "#009E73","#56B4E9")
 Spatial.dompred.plot <- Spatial.emmeans%>%
   ggplot(aes(x = dompred, y = response, color = season)) +
   geom_point(position = position_dodge(width = 0.3), size = 7) +
-  geom_line(aes(group = season), position = position_dodge(width = 0.3), size = 0.5) +
+  geom_line(aes(group = season), position = position_dodge(width = 0.3), linewidth = 0.5) +
   geom_linerange(aes(ymin = asymp.LCL, ymax = asymp.UCL),
                  position = position_dodge(width = 0.3), size = 0.5) +
   theme_classic() +
@@ -300,10 +239,10 @@ DomPredata<-read.csv("Data/PredType2.csv",header=T)%>%
   mutate_at(vars(dompred, Pondnum), as.factor)
 
 
-n <-5 #number of ponds to draw from each predator type
-numsim <- 500 #number of simulations to run
+n <-3 #number of ponds to draw from each predator type
+numsim <- 1000 #number of simulations to run
 spbeta.rand <- tibble(pondnum1 = factor(),
-                      dompred = factor(levels = c("S","G","B")),
+                      dompred = factor(levels = c("N", "S","G","B")),
                       pondnum2 = factor(),
                       distance = numeric(),
                       year = factor(),
@@ -314,7 +253,7 @@ spbeta.rand <- tibble(pondnum1 = factor(),
 
 for(i in 1:numsim){
   samponds <- DomPredata%>%
-    filter(dompred != "O", dompred != "N")%>% 
+    filter(dompred != "O")%>% 
     group_by(dompred)%>%
     sample_n(n)
   
@@ -325,19 +264,10 @@ for(i in 1:numsim){
   
 }
 
-#Calculate average values and CI's for predator x season combinations
-spbeta.rand.avg <- spbeta.rand%>%
-  group_by(dompred, season)%>%
-  summarise(avgdist = mean(distance), 
-            asymp.LCL = quantile(distance, probs = 0.025),
-            asymp.UCL = quantile(distance, probs = 0.975))
-
-
-
 
 
 #Save the data
-write.csv(spbeta.rand.avg, "Data/spbeta.rand.avg.csv", row.names = F)
+write.csv(spbeta.rand, "Data/spbeta.rand.csv", row.names = F)
 
 #Graph distribution of mean values by dompred
 spbeta.rand%>%
