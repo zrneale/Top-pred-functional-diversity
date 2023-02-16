@@ -58,7 +58,7 @@ Alpha.plot <- FDis.emmeans%>%
   geom_line(aes(group = season), position=position_dodge(width=0.5),size=0.5) +
   geom_linerange(aes(ymin=lower.CL, ymax= upper.CL),
                  position=position_dodge(width=0.5),size=0.5) +
-  stat_summary(fun = "mean", geom = "point", color = "black", alpha = 0.5, shape = 17, size = 5, show.legend = T) + 
+  stat_summary(fun = "mean", geom = "point", color = "black", alpha = 0.6, shape = 17, size = 3) + 
   theme_classic() +
   labs(x = "Top predator",
        y = paste("FDis\n(α diversity)"),
@@ -78,10 +78,7 @@ Spatial.plot <- Spatial.emmeans%>%
   geom_line(aes(group = season), position = position_dodge(width = 0.5), size = 0.5) +
   geom_linerange(aes(ymin = asymp.LCL, ymax = asymp.UCL),
                  position = position_dodge(width = 0.5), size = 0.5) +
-  stat_summary(fun = "mean", geom = "segment", 
-               aes(xend = ..x.. - 0.25, yend = ..y..), color = "black") +
-  stat_summary(fun = "mean", geom = "segment", 
-               aes(xend = ..x.. + 0.25, yend = ..y..), color = "black") +
+  stat_summary(fun = "mean", geom = "point", color = "black", alpha = 0.6, shape = 17, size = 3) + 
   theme_classic() +
   labs(x = "Top Predator", 
        y = paste("Spatial Dissimilarity\n(β diversity)"),
@@ -103,10 +100,7 @@ Temporal.plot <- Temporal.emmeans%>%
   geom_line(aes(group = season), position = position_dodge(width = 0.5), size = 0.5) +
   geom_linerange(aes(ymin = asymp.LCL, ymax = asymp.UCL),
                  position = position_dodge(width = 0.5), size = 0.5) +
-  stat_summary(fun = "mean", geom = "segment", 
-               aes(xend = ..x.. - 0.25, yend = ..y..), color = "black") +
-  stat_summary(fun = "mean", geom = "segment", 
-               aes(xend = ..x.. + 0.25, yend = ..y..), color = "black") +
+  stat_summary(fun = "mean", geom = "point", color = "black", alpha = 0.6, shape = 17, size = 3) + 
   theme_classic() +
   labs(x = "Top Predator", 
        y = paste("Temporal Dissimilarity\n(β diversity)"),
@@ -133,118 +127,80 @@ ggsave("Figures/Diversity.combined.figure.tiff", width = 7.33, height = 9.19)
 
 #Randomized alpha plot
 
-#The randomized only includes salamander, sunfish, and bass ponds because we drew five ponds in each randomization to match the invertebrate sample size which means each randomization would give the same invertebrate values. For the figure I'll graph the observed invert mean + SE beside the resampled mean + SE for the other three pond types.
+library(scales) #for setting the number of digits in FDis values
 
-
-#Combine the randomized mean values with the observed values for invert ponds and make the plot. 
-
-FDis.rand%>%
+Alpha.rand.plot <- FDis.rand%>%
   group_by(dompred, season, sim)%>%
   dplyr::summarise(FDis = mean(FDis))%>%
   ggplot(aes(x = dompred, y = FDis, color = dompred)) +
   geom_violin(aes(fill = dompred)) +
   theme_classic() +
-  scale_color_manual(values=cbPalette) +
-  scale_fill_manual(values = cbPalette) +
-  theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
-  #ggtitle("Resampled alpha Dissimilarity") +
+  scale_color_manual(values=predPalette, labels = c("Invertebrate", "Salamander", "Sunfish", "Bass"), name = "Top Predator") +
+  scale_fill_manual(values = predPalette, labels = c("Invertebrate", "Salamander", "Sunfish", "Bass"), name = "Top Predator") +
+  theme(plot.title = element_text(hjust = 0.5)) +
   labs(x = "Predator", 
        y = "Mean FDis") +
-  facet_grid(.~season) +
+  facet_grid(.~season, labeller = labeller(season = c("W" = "Winter", "Sp" = "Spring", 
+                                                      "Su" = "Summer", "F" = "Fall"))) +
   labs(x = "Top Predator", 
-       y = paste("FDis\n(α diversity) +/- CI")) +
-  scale_color_manual(values=cbPalette, labels = c("Winter", "Spring", "Summer", "Fall")) +
+       y = paste("Mean FDis"),
+       legend.title = "Top Predator") +
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  Textsize
-
-
-Alpha.rand.plot <- FDis.rand%>%
-  group_by(dompred, season, sim)%>%
-  dplyr::summarise(FDis = mean(FDis))%>%
-  ggplot(aes(x = dompred, y = avgFDis, color = season), data = .) +
-  geom_point(position = position_dodge(width = 0.5), size = 5) +
-  #geom_line(aes(group = season), position = position_dodge(width = 0.5), size = 0.5) +
-  geom_linerange(aes(ymin = lower.CL, ymax = upper.CL),
-                 position = position_dodge(width = 0.5), size = 0.5) +
-  theme_classic() +
-  labs(x = "Top Predator", 
-       y = paste("FDis\n(α diversity) ± CI"),
-       color = "Season") +
-  scale_color_manual(values=cbPalette, labels = c("Winter", "Spring", "Summer", "Fall")) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
-  Textsize
+  Textsize +
+  scale_y_continuous(labels = label_number(accuracy = 0.1)) 
 
 
 #Randomized spatial plot
 
-
-#The randomized only includes salamander, sunfish, and bass ponds because we drew five ponds in each randomization to match the invertebrate sample size which means each randomization would give the same invertebrate values. For the figure I'll graph the observed invert mean + SE beside the resampled mean + SE for the other three pond types.
-
-
-#Combine the randomized mean values with the observed values for invert ponds and make the plot. 
-
-Spatial.rand.plot <- Spatial.emmeans%>%
-  filter(dompred == "N")%>%
-  rename(avgdist = response)%>%
-  dplyr::select(dompred, season, avgdist, asymp.LCL, asymp.UCL)%>%
-  rbind(spbeta.rand.avg)%>%
-  ggplot(aes(x = dompred, y = avgdist, color = season), data = .) +
-  geom_point(position = position_dodge(width = 0.5), size = 5) +
-  #geom_line(aes(group = season), position = position_dodge(width = 0.5), size = 0.5) +
-  geom_linerange(aes(ymin = asymp.LCL, ymax = asymp.UCL),
-                 position = position_dodge(width = 0.5), size = 0.5) +
+Spatial.rand.plot <- spbeta.rand%>%
+  group_by(dompred, season, sim)%>%
+  dplyr::summarise(mean.dist = mean(distance))%>%
+  ggplot(aes(x = dompred, y = mean.dist, color = dompred)) +
+  geom_violin(aes(fill = dompred)) +
   theme_classic() +
-  labs(x = "Top Predator", 
-       y = paste("Spatial Dissimilarity\n(β diversity) +/- CI"),
-       color = "Season") +
-  scale_color_manual(values=cbPalette, labels = c("Winter", "Spring", "Summer", "Fall")) +
+  scale_color_manual(values=predPalette, labels = c("Invertebrate", "Salamander", "Sunfish", "Bass"), name = "Top Predator") +
+  scale_fill_manual(values = predPalette, labels = c("Invertebrate", "Salamander", "Sunfish", "Bass"), name = "Top Predator") +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Predator", 
+       y = "Mean Spatial Dissimilarity") +
+  facet_grid(.~season, labeller = labeller(season = c("W" = "Winter", "Sp" = "Spring", 
+                                                      "Su" = "Summer", "F" = "Fall"))) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        strip.background = element_blank(),
+        strip.text.x = element_blank()) +
+  Textsize
+
+#Randomized temporal plot
+
+Temporal.rand.plot <-tempbeta.rand%>%
+  group_by(dompred, season, sim)%>%
+  dplyr::summarise(mean.dist = mean(distance))%>%
+  ggplot(aes(x = dompred, y = mean.dist, color = dompred)) +
+  geom_violin(aes(fill = dompred)) +
+  theme_classic() +
+  scale_color_manual(values=predPalette, labels = c("Invertebrate", "Salamander", "Sunfish", "Bass"), name = "Top Predator") +
+  scale_fill_manual(values = predPalette, labels = c("Invertebrate", "Salamander", "Sunfish", "Bass"), name = "Top Predator") +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
+  #ggtitle("Randomized Spatial Dissimilarity") +
+  labs(x = "Predator", 
+       y = "Mean Spatial Dissimilarity") +
+  facet_grid(.~season, labeller = labeller(season = c("W_Sp" = "Winter_Spring", 
+                                                      "Sp_Su" = "Spring_Summer", 
+                                                      "Su_F" = "Summer_Fall", 
+                                                      "F_W" = "Fall_Winter"))) +
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
   Textsize
 
 
-#Randomized temporal plot
-
-
-#The randomized only includes salamander, sunfish, and bass ponds because we drew five ponds in each randomization to match the invertebrate sample size which means each randomization would give the same invertebrate values. For the figure I'll graph the observed invert mean + SE beside the resampled mean + SE for the other three pond types.
-
-
-#Combine the randomized mean values with the observed values for invert ponds and make the plot. 
-
-Temporal.rand.plot <- Temporal.emmeans%>%
-  filter(dompred == "N", season != "Mean")%>%
-  rename(avgdist = response)%>%
-  dplyr::select(dompred, season, avgdist, asymp.LCL, asymp.UCL)%>%
-  rbind(tempbeta.rand.avg)%>%
-  ggplot(aes(x = dompred, y = avgdist, color = season), data = .) +
-  geom_point(position = position_dodge(width = 0.5), size = 5) +
-  #geom_line(aes(group = season), position = position_dodge(width = 0.5), size = 0.5) +
-  geom_linerange(aes(ymin = asymp.LCL, ymax = asymp.UCL),
-                 position = position_dodge(width = 0.5), size = 0.5) +
-  theme_classic() +
-  labs(x = "Top Predator", 
-       y = paste("Temporal Dissimilarity\n(β diversity) +/- CI"),
-       color = "Season") +
-  scale_color_manual(values=cbPalette) +
-  #theme(axis.title.x = element_blank(),
-  #axis.text.x = element_blank(),
-  #axis.ticks.x = element_blank()) +
-  scale_x_discrete(labels=c("Invertebrate","Salamander","Sunfish","Bass")) +
-  theme(axis.title.x = element_text(size = 14),
-        axis.text.x = element_text(size = 12)) +
-  Textsize
-
-
 #Combine the randomized plots
-#I'm going to have one legend for the alpha and spatial beta plots and a separate one for the temporal beta. I think the best way to do this is to first make a combined plot for the first two sharing a legend, then combine that one with the temporal plot
 
-Alpha.spatial.rand.plot <- ggarrange(Alpha.rand.plot, Spatial.rand.plot, common.legend = T, legend = "right", ncol = 1)
+ggarrange(Alpha.rand.plot, Spatial.rand.plot, Temporal.rand.plot, common.legend = T, 
+          legend = "right", ncol = 1)
 
-#Add the temporal plot
-ggarrange(Alpha.spatial.rand.plot, Temporal.rand.plot, common.legend = F, ncol = 1, heights = c(2,1))
-ggsave("Figures/Diversity.rand.combined.figure.tiff", width = 7.33, height = 9.19)
+ggsave("Figures/Diversity.rand.combined.figure.jpg", width = 7.33, height = 9.19)

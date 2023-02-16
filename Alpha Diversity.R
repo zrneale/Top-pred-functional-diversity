@@ -110,7 +110,7 @@ FDis.all.emmeans <- as.data.frame(FDis.all.posthoc$emmeans)%>%
 FDis.dompred.emmeans%>%
   mutate(season = "Mean")%>%
   rbind(FDis.season.emmeans)%>%
-  write.csv("Data/FDis.emmeans.csv")
+  write.csv("Data/FDis.emmeans.csv", row.names = F)
 
 
 #Colorblind friendly palette for graphing
