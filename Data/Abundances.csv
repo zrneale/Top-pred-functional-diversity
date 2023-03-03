@@ -1,4 +1,4 @@
-survey,pond,effort,dry,perm,season,month,year,date,species,abundance
+survey,pond,effort,dry,perm,season,month,year,date,spID,abundance
 1,ANF  1-1,15,N,S,Su,Jul,2008,8-Jul,Ajun,0
 1,ANF  1-1,15,N,S,Su,Jul,2008,8-Jul,Along,0
 1,ANF  1-1,15,N,S,Su,Jul,2008,8-Jul,Arigomphus lentulus,0

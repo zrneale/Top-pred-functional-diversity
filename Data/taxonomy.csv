@@ -1,42 +1,42 @@
-latin,species,suborder,family
-Anax junius,Ajun,Anisoptera,Aeshnidae
-Anax longipes,Along,Anisoptera,Aeshnidae
-Basiaeschna janata,Bjanata,Anisoptera,Aeshnidae
-Coryphaeschna ingens,C_igens,Anisoptera,Aeshnidae
-Epiaeschna heros,Eheros,Anisoptera,Aeshnidae
-Nasiaeschna pentacantha,N_pentacantha,Anisoptera,Aeshnidae
-Epitheca princeps,Epitheca_princeps,Anisoptera,Corduliidae
-Epitheca semiaquea,Epitheca_semiaquea,Anisoptera,Corduliidae
-Epitheca cynosura,Epitheca_cynosura,Anisoptera,Corduliidae
-Arigomphus lentulus,Arigomphus lentulus,Anisoptera,Gomphidae
-Arigomphus maxwelli,Arigomphus maxwelli,Anisoptera,Gomphidae
-Gomphus lividus,Gomphus lividus,Anisoptera,Gomphidae
-Celithemis amanda,CelithemisA,Anisoptera,Libellulidae
-Celithemis elisa,Celithemis elisa,Anisoptera,Libellulidae
-Celithemis fasciata,CelithemisF,Anisoptera,Libellulidae
-Celithemis ornata/verna,CelithemisO,Anisoptera,Libellulidae
-Didymops transversa,Didymops_transversa,Anisoptera,Libellulidae
-Erythemis simplicicollis,Erythemis,Anisoptera,Libellulidae
-Erythrodiplax minuscula,Erythrodiplax,Anisoptera,Libellulidae
-Ladona deplanata,Ladona,Anisoptera,Libellulidae
-Libellula spp.,Libellula,Anisoptera,Libellulidae
-Pachydiplax longipennis,Pachydiplax,Anisoptera,Libellulidae
-Pantala flavescens,Pantala,Anisoptera,Libellulidae
-Perithemis tenera,Perithemis_tenera,Anisoptera,Libellulidae
-Plathemis lydia,Plathemis,Anisoptera,Libellulidae
-Sympetrum ambiguum,Sympetrum_ambiguum,Anisoptera,Libellulidae
-Tramea carolina,Tramea,Anisoptera,Libellulidae
-Enallagma aspersum,Enalaspersum,Zygoptera,Coenagrionidae
-Enallagma basidens,Ebasidans,Zygoptera,Coenagrionidae
-Enallagma divigans,Enaldivagans,Zygoptera,Coenagrionidae
-Enallagma dubium,Enaldubium,Zygoptera,Coenagrionidae
-Enallagma geminatum,Enalgeminatum,Zygoptera,Coenagrionidae
-Enallagma signatum,Enalsignatum,Zygoptera,Coenagrionidae
-Enallagma vespersum,Enalvesperum,Zygoptera,Coenagrionidae
-Ischnura posita,Iposita,Zygoptera,Coenagrionidae
-Ischnura ramburii,Iramburii,Zygoptera,Coenagrionidae
-Nehalennia integricollis,Nehalennia,Zygoptera,Coenagrionidae
-Telebasis byersi,Telebasis,Zygoptera,Coenagrionidae
-Lestes australis,Lestes_d_australis,Zygoptera,Lestidae
-Lestes inaequalis,Lestes_inaequalis,Zygoptera,Lestidae
-Lestes vigilax,Lestes_vigilax,Zygoptera,Lestidae
+suborder,family,genus,species,spID,spLabel,latin
+Anisoptera,Aeshnidae,Anax,junius,Ajun,A. junius,Anax junius
+Anisoptera,Aeshnidae,Anax,longipes,Along,A. longipes,Anax longipes
+Anisoptera,Aeshnidae,Basiaeschna,janata,Bjanata,B. janata,Basiaeschna janata
+Anisoptera,Aeshnidae,Coryphaeschna,ingens,C_igens,C. ingens,Coryphaeschna ingens
+Anisoptera,Aeshnidae,Epiaeschna,heros,Eheros,E. heros,Epiaeschna heros
+Anisoptera,Aeshnidae,Nasiaeschna,pentacantha,N_pentacantha,N. pentacantha,Nasiaeschna pentacantha
+Anisoptera,Corduliidae,Epitheca,princeps,Epitheca_princeps,E. princeps,Epitheca princeps
+Anisoptera,Corduliidae,Epitheca,semiaquea,Epitheca_semiaquea,E. semiaquea,Epitheca semiaquea
+Anisoptera,Corduliidae,Epitheca,cynosura,Epitheca_cynosura,E. cynosura,Epitheca cynosura
+Anisoptera,Gomphidae,Arigomphus,lentulus,Arigomphus lentulus,A. lentulus,Arigomphus lentulus
+Anisoptera,Gomphidae,Arigomphus,maxwelli,Arigomphus maxwelli,A. maxwell,Arigomphus maxwelli
+Anisoptera,Gomphidae,Gomphus,lividus,Gomphus lividus,G. lividus,Gomphus lividus
+Anisoptera,Libellulidae,Celithemis,amanda,CelithemisA,C. amanda,Celithemis amanda
+Anisoptera,Libellulidae,Celithemis,elisa,Celithemis elisa,C. elisa,Celithemis elisa
+Anisoptera,Libellulidae,Celithemis,fasciata,CelithemisF,C. fasciata,Celithemis fasciata
+Anisoptera,Libellulidae,Celithemis,ornata/verna,CelithemisO,C. ornata/verna,Celithemis ornata/verna
+Anisoptera,Libellulidae,Didymops,transversa,Didymops_transversa,D. transversa,Didymops transversa
+Anisoptera,Libellulidae,Erythemis,simplicicollis,Erythemis,E. simplicoliis,Erythemis simplicicollis
+Anisoptera,Libellulidae,Erythrodiplax,minuscula,Erythrodiplax,E. minuscula,Erythrodiplax miniscula
+Anisoptera,Libellulidae,Ladona,deplanata,Ladona,L. deplanata,Ladona deplanata
+Anisoptera,Libellulidae,Libellula,spp.,Libellula,L. spp.,Libellula spp.
+Anisoptera,Libellulidae,Pachydiplax,longipennis,Pachydiplax,P. longipennis,Pachydiplax longipennis
+Anisoptera,Libellulidae,Pantala,flavescens,Pantala,P. flavescens,Pantala flavescens
+Anisoptera,Libellulidae,Perithemis,tenera,Perithemis_tenera,P. tenera,Perithemis tenera
+Anisoptera,Libellulidae,Plathemis,lydia,Plathemis,P. lydia,Plathemis lydia
+Anisoptera,Libellulidae,Sympetrum,ambiguum,Sympetrum_ambiguum,S. ambiguum,Sympetrum ambiguum
+Anisoptera,Libellulidae,Tramea,carolina,Tramea,T. carolina,Tramea carolina
+Zygoptera,Coenagrionidae,Enallagma,aspersum,Enalaspersum,E. aspersum,Enallagma aspersum
+Zygoptera,Coenagrionidae,Enallagma,basidens,Ebasidans,E. basidens,Enallagma basidens
+Zygoptera,Coenagrionidae,Enallagma,divigans,Enaldivagans,E. divigans,Enallagma divigans
+Zygoptera,Coenagrionidae,Enallagma,dubium,Enaldubium,E. dubium,Enallagma dubium
+Zygoptera,Coenagrionidae,Enallagma,geminatum,Enalgeminatum,E. geminatum,Enallagma geminatum
+Zygoptera,Coenagrionidae,Enallagma,signatum,Enalsignatum,E. sigatum,Enallagma signatum
+Zygoptera,Coenagrionidae,Enallagma,vespersum,Enalvesperum,E. vespersum,Enallagma vespersum
+Zygoptera,Coenagrionidae,Ischnura,posita,Iposita,I. posita,Ischnura posita
+Zygoptera,Coenagrionidae,Ischnura,ramburii,Iramburii,I. ramburii,Ischnura ramburii
+Zygoptera,Coenagrionidae,Nehalennia,integricollis,Nehalennia,N. integricollis,Nehalennia integricollis
+Zygoptera,Coenagrionidae,Telebasis,byersi,Telebasis,T. byersi,Telebasis byersi
+Zygoptera,Lestidae,Lestes,australis,Lestes_d_australis,L. australis,Lestes australis
+Zygoptera,Lestidae,Lestes,inaequalis,Lestes_inaequalis,L. inaequalis,Lestes inaequalis
+Zygoptera,Lestidae,Lestes,vigilax,Lestes_vigilax,L. vigilax,Lestes vigilax

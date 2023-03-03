@@ -26,9 +26,6 @@ Pondata <- left_join(DomPredata, Envdata, by = "pond")
 
 #write.csv(Pondata, "Data/Pondata.csv", row.names = F)
 
-#Change Species column names to latin for merging
-names(Traitdata)[4]<-"latin" 
-
 
 #calculate average trait values by spp
 
@@ -36,7 +33,7 @@ Traitaverage<-Traitdata %>%
   filter(Stage== "F-0" | Stage== "F-0?")%>% #Include only the F-0 stages
   group_by(latin)%>%
   dplyr::summarise_at(vars("Body_A":"Eye_A","Gape_W":"Mentum_L"),mean,na.rm=T)%>%
-  left_join(Taxonomy,by="latin") #Attach species abreviations 
+  left_join(Taxonomy,by="latin") #Attach species abbreviations 
 
 
 ##Make decision on Libellula data, since there are 3 spp in trait dataset but abundance data only resolved to genus
@@ -62,18 +59,18 @@ Gomph<-Traitdata%>%
   filter(Stage== "F-0" | Stage== "F-0?")%>% #Include only the F-0 stages
   group_by(latin)%>%
   dplyr::summarise(count = n())%>%
-  dplyr::rename(species = latin)%>%
-  right_join(Abundata, by = "species")%>%
-  filter(count < 3)%>%
+  dplyr::rename(spID = latin)%>%
+  right_join(Abundata, by = "spID")%>%
+  filter(count < 3)%>%view()
   dplyr::select(year, season, pond)%>%
   left_join(Abundata, by = c("year", "season", "pond"))
 Gomph%>%
-  filter(species != "Gomphus lividus")%>%
+  filter(spID == "Gomphus lividus")%>%
   group_by(year, season, pond)%>%
-  dplyr::summarise(count = n())
+  dplyr::summarise(count = n()) 
 
-
-
+Abundata%>%
+  filter()
 #Remove the other two species of Libellula and Gomphus lividus
 Traitaverage <- filter(Traitaverage, latin != "Libellula vibrans" 
                        & latin != "Libellula auripennis"
