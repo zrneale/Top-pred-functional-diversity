@@ -19,12 +19,26 @@ speciesdist <- daisy(Traitaverage, metric = "gower", stand = T)
 PCOA <- pcoa(speciesdist, correction = "none")
 biplot(PCOA, plot.axes = c(1,2))
 
+
+#Publication-quality plot of each species in PCOA space
+PCOA$vectors%>%
+  data.frame()%>%
+  ggplot(aes(x = Axis.1, y = Axis.2)) +
+    geom_point(size = 2) +
+    geom_text_repel(label = row.names(PCOA$vectors), 
+                    max.overlaps = 30, box.padding = 1, point.padding = 1,
+                    segment.size = 0.3, size = 5) +
+    labs(y = "PCOA Axis 2", x = "PCOA Axis 1") +
+    theme_classic()
+
 ##Attach the appropriate PCoA axis values to each of the observations in the final abundance data
 Abundanceordi <- PCOA$vectors[,1:2]%>%
   as.data.frame()%>%
   rownames_to_column("species")%>%
   right_join(Finaldata, by = "species")
 
+
+  
 
 ##Calculate the pond averages on the two axes
 Averageordi <- Abundanceordi%>%
