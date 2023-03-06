@@ -55,22 +55,24 @@ Traitaverage[22,15] <- "Anisoptera"
 Traitaverage[22,16] <- "Libellulidae"
 
 #Gomphus lividus only had 1 sample from which the size measurement was taken.  Here I check to see how many samples contained this species and how many other species were included in those samples
-Gomph<-Traitdata%>%
-  filter(Stage== "F-0" | Stage== "F-0?")%>% #Include only the F-0 stages
-  group_by(latin)%>%
-  dplyr::summarise(count = n())%>%
-  dplyr::rename(spID = latin)%>%
-  right_join(Abundata, by = "spID")%>%
-  filter(count < 3)%>%view()
-  dplyr::select(year, season, pond)%>%
-  left_join(Abundata, by = c("year", "season", "pond"))
-Gomph%>%
-  filter(spID == "Gomphus lividus")%>%
-  group_by(year, season, pond)%>%
-  dplyr::summarise(count = n()) 
+
+GomphAbundata <- Abundata%>%
+  filter(spID == "Gomphus lividus" & abundance >=1)%>%
+  mutate(gomphabun = abundance)%>%
+  select(pond, season, year, gomphabun)
 
 Abundata%>%
-  filter()
+  group_by(pond, season, year)%>%
+  summarize(totalabun = sum(abundance))%>%
+  filter(totalabun > 3)%>%
+  dplyr::right_join(GomphAbundata)%>%
+  dplyr::left_join(DomPredata)%>%
+  filter(dompred != "O")%>%
+  view()
+  
+#Gomphus was pretty rare, so I'll remove it from the analysis
+
+
 #Remove the other two species of Libellula and Gomphus lividus
 Traitaverage <- filter(Traitaverage, latin != "Libellula vibrans" 
                        & latin != "Libellula auripennis"
@@ -79,26 +81,27 @@ Traitaverage <- filter(Traitaverage, latin != "Libellula vibrans"
 
 #Save Traitaverage file with rows arranged alphabetically. I'll need this file for the dbFD function
 #Traitaverage%>%
-  #arrange(species)%>%
+  #arrange(spID)%>%
   #write.csv("Data/Traitaverage.csv",row.names = F)
 
 ##Add the pond environmental data
-#join dominant predator and environment datasets
-Pondata<-left_join(DomPredata, Envdata,by="pond")
+#join dominant predator and environment datasets and remove ponds categorized as other predators
+Pondata<-left_join(DomPredata, Envdata,by="pond")%>%
+  filter(dompred != "O")
 
 #change "na" values in ponddata to true "NA"'s
 Pondata$substrate[Pondata$substrate == "na"] <- NA
 Pondata$litter[Pondata$litter == "na"] <- NA
 
-#Remove "O" predator ponds from ponddata and save
-Pondata%>%
-  filter(dompred != "O")%>%
-  write.csv("Data/Pondata.csv")
+#save
+#Pondata%>%
+  #write.csv("Data/Pondata.csv")
+
 #uncount abundance data
 Abundanceuncount<-uncount(Abundata,abundance)
 
 #Add trait values to abundance data
-Abundancetraits<-left_join(Abundanceuncount,Traitaverage,by="species")%>%
+Abundancetraits<-left_join(Abundanceuncount,Traitaverage, by="spID")%>%
   drop_na()
 
 #add pond data to abundance/traits data. Dropping the "other" predator ponds.
@@ -108,8 +111,8 @@ Finaldata<-left_join(Abundancetraits,Pondata,by="pond")%>%
   droplevels()
 
 
-
-#write.csv(Finaldata,"Data/Finaldata.csv", row.names = F)
+#save
+write.csv(Finaldata,"Data/Finaldata.csv", row.names = F)
 
 #Some more prep for calculating FDis, which requires a wide version of abundance data
 
