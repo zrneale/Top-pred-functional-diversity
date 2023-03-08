@@ -27,6 +27,7 @@ spbeta.rand <- read.csv("Data/spbeta.rand.csv")%>%
   mutate(dompred = fct_relevel(dompred, c("N", "S", "G", "B")),
          season = fct_relevel(season, c("W", "Sp", "Su", "F")))
 
+
 tempbeta.rand <- read.csv("Data/tempbeta.rand.csv")%>%
   mutate(dompred = fct_relevel(dompred, c("N", "S", "G", "B")),
          season = fct_relevel(season, c("W_Sp", "Sp_Su", "Su_F", "F_W")))
@@ -119,7 +120,7 @@ library(ggpubr)
 Alpha.spatial.plot <- ggarrange(Alpha.plot, Spatial.plot, common.legend = T, legend = "right", ncol = 1)
 
 #Add the temporal plot
-ggarrange(Alpha.spatial.plot, Temporal.plot, common.legend = F, ncol = 1, heights = c(2,1), labels = "auto")
+ggarrange(Alpha.spatial.plot, Temporal.plot, common.legend = F, ncol = 1, heights = c(2,1))
 ggsave("Figures/Diversity.combined.figure.jpg", width = 7.33, height = 9.19)
 
 

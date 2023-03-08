@@ -53,6 +53,9 @@ ggplot(Libtraits, aes(Body.Area)) + geom_histogram(binwidth=2) +
 Traitaverage[22,14] <- "Libellula"
 Traitaverage[22,15] <- "Anisoptera"
 Traitaverage[22,16] <- "Libellulidae"
+Traitaverage[22,17] <- "incesta"
+Traitaverage[22,18] <- "Libellula"
+Traitaverage[22,19] <- "Libellula spp."
 
 #Gomphus lividus only had 1 sample from which the size measurement was taken.  Here I check to see how many samples contained this species and how many other species were included in those samples
 
@@ -77,12 +80,12 @@ Abundata%>%
 Traitaverage <- filter(Traitaverage, latin != "Libellula vibrans" 
                        & latin != "Libellula auripennis"
                        & latin != "Gomphus lividus")%>%
-  dplyr::select(-c(latin, suborder, family)) # Don't need these
+  dplyr::select(-c(latin, suborder, family, genus, species, spLabel)) # Don't need these
 
 #Save Traitaverage file with rows arranged alphabetically. I'll need this file for the dbFD function
-#Traitaverage%>%
-  #arrange(spID)%>%
-  #write.csv("Data/Traitaverage.csv",row.names = F)
+Traitaverage%>%
+  arrange(spID)%>%
+  write.csv("Data/Traitaverage.csv",row.names = F)
 
 ##Add the pond environmental data
 #join dominant predator and environment datasets and remove ponds categorized as other predators

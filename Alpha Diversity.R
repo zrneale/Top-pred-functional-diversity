@@ -22,7 +22,7 @@ DomPredata <- read.csv("Data/PredType2.csv")
 
 
 #Some quick data prep for functional diversity calculations. The function to calculate function diversity metrics requires a wide version of abundance data.
-#Also, the species in Traitaverage need to be assigned to row names
+#Also, the spID in Traitaverage need to be assigned to row names
 
 #ID variable needs to be moved to row names. Remove samples with fewer than 3 observations to reduce biased averages.
 #Also removing samples with <3 observations to avoid biased averages.
@@ -31,9 +31,9 @@ AbundancewideFD <- AbundancewideFD%>%
   filter(sum(c_across(Ajun:Tramea))>=3)%>%
   column_to_rownames("ID")
 
-#Species column in Traitaverage needs to be assigned to row names and removed
+#spID column in Traitaverage needs to be assigned to row names and removed
 Traitaverage <- Traitaverage%>%
-  column_to_rownames("species")
+  column_to_rownames("spID")
 
 #Calculate FD metrics
 FD<-dbFD(Traitaverage, AbundancewideFD, w.abun=T)

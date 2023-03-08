@@ -8,34 +8,43 @@ Finaldata <- read.csv("Data/Finaldata.csv")%>%
   mutate(season = factor(season, levels = c("W", "Sp", "Su", "F")))%>% #Reorder for graphing
   mutate(dompred = factor(dompred, levels = c("N", "S", "G", "B")))
 Traitaverage <- read.csv("Data/Traitaverage.csv")%>%
-  column_to_rownames("species")
-
-                     
-#Conduct a PCoA on the species traits. PCoA was chosen because it's the method used in calculating FDis
+  column_to_rownames("spID")
+Taxonomy <- read.csv("Data/taxonomy.csv")
+#Conduct a PCoA on the spID traits. PCoA was chosen because it's the method used in calculating FDis
 
 
 ##Need a distance matrix first
-speciesdist <- daisy(Traitaverage, metric = "gower", stand = T)
-PCOA <- pcoa(speciesdist, correction = "none")
+spIDdist <- daisy(Traitaverage, metric = "gower", stand = T)
+PCOA <- pcoa(spIDdist, correction = "none")
 biplot(PCOA, plot.axes = c(1,2))
 
-
-#Publication-quality plot of each species in PCOA space
-PCOA$vectors%>%
+#Create data set containing the points on the first two axes for each spID and attach the spID labels from the taxonomy data set
+pcoadf <- PCOA$vectors%>%
   data.frame()%>%
+  rownames_to_column(var = "spID")%>%
+  left_join(Taxonomy, by = "spID")
+
+#write.csv(pcoadf, "pcoa.df.csv")
+
+#Publication-quality plot of each spID in PCOA space
+pcoadf%>%
   ggplot(aes(x = Axis.1, y = Axis.2)) +
     geom_point(size = 2) +
-    geom_text_repel(label = row.names(PCOA$vectors), 
+    geom_text_repel(label = pcoadf$spLabel, 
                     max.overlaps = 30, box.padding = 1, point.padding = 1,
                     segment.size = 0.3, size = 5) +
     labs(y = "PCOA Axis 2", x = "PCOA Axis 1") +
-    theme_classic()
+    theme_classic() +
+    theme(axis.title = element_text(size = 18),
+          axis.text = element_text(size = 12)) 
+#ggsave("Figures/spID.pcoa.tiff", height = 6.47, width = 11.18)
+    
 
 ##Attach the appropriate PCoA axis values to each of the observations in the final abundance data
 Abundanceordi <- PCOA$vectors[,1:2]%>%
   as.data.frame()%>%
-  rownames_to_column("species")%>%
-  right_join(Finaldata, by = "species")
+  rownames_to_column("spID")%>%
+  right_join(Finaldata, by = "spID")
 
 
   
@@ -116,7 +125,7 @@ Loadings <- arrows_df%>%
 
 
 #Facet by dompred
-Dompred.traitspace <- Averageordi2%>%
+Averageordi2%>%
   ggplot(aes(x=meanAxis1,y=meanAxis2))+
   layer(data = filter(Averageordi2, dompred == "G"), stat = StatIdentity, position = PositionIdentity, geom = ggplot2::GeomCustomAnn,
         params = list(grob = ggplotGrob(Loadings), 
@@ -141,10 +150,10 @@ Dompred.traitspace <- Averageordi2%>%
 
 
 #Save
-ggsave("Figures/Traitspace.dompred.jpg", width = 15.32, height = 9.34)
+ggsave("Figures/Traitspace.dompred.tiff", width = 15.32, height = 9.34)
 
 #Facet by season
-Season.traitspace <- Averageordi2%>%
+Averageordi2%>%
   ggplot(aes(x=meanAxis1,y=meanAxis2))+
   layer(data = filter(Averageordi2, season == "Su"), stat = StatIdentity, position = PositionIdentity, geom = ggplot2::GeomCustomAnn,
         params = list(grob = ggplotGrob(Loadings), 
@@ -168,7 +177,7 @@ Season.traitspace <- Averageordi2%>%
          shape = guide_legend(order = 2))
 
 #Save
-ggsave("Figures/Traitspace.season.jpg", width = 15.32, height = 9.34)
+ggsave("Figures/Traitspace.season.tiff", width = 15.32, height = 9.34)
 
 
 #Facet by year
@@ -190,7 +199,7 @@ Averageordi2%>%
 
 #Convert data to long form
 Traitslong <- Finaldata%>%
-  dplyr::select(pond, season, year, species, dompred, Body_A:Mentum_L)%>%
+  dplyr::select(pond, season, year, spID, dompred, Body_A:Mentum_L)%>%
   gather(trait, value, Body_A:Mentum_L)%>%
   group_by(dompred, season, trait) 
 
@@ -222,7 +231,7 @@ PlotTraits("W") +
   ggtitle("Winter") +
   theme(plot.title = element_text(size = 20, face = "bold"))
 
-ggsave("Figures/traits.winter.jpg", width = 10.19, height = 9.19)
+ggsave("Figures/traits.winter.tiff", width = 10.19, height = 9.19)
 
 
 #Plot spring traits
@@ -230,7 +239,7 @@ PlotTraits("Sp") +
   ggtitle("Spring") +
   theme(plot.title = element_text(size = 20, face = "bold"))
 
-ggsave("Figures/traits.spring.jpg", width = 10.19, height = 9.19)
+ggsave("Figures/traits.spring.tiff", width = 10.19, height = 9.19)
 
 
 #Plot summer traits
@@ -238,13 +247,13 @@ PlotTraits("Su") +
   ggtitle("Summer") +
   theme(plot.title = element_text(size = 20, face = "bold"))
 
-ggsave("Figures/traits.summer.jpg", width = 10.19, height = 9.19)
+ggsave("Figures/traits.summer.tiff", width = 10.19, height = 9.19)
 
 #Plot fall traits
 PlotTraits("F") +
   ggtitle("Fall") +
   theme(plot.title = element_text(size = 20, face = "bold"))
 
-ggsave("Figures/traits.fall.jpg", width = 10.19, height = 9.19)
+ggsave("Figures/traits.fall.tiff", width = 10.19, height = 9.19)
 
 
