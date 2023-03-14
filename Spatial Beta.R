@@ -1,10 +1,7 @@
+#This file calculates the spatial beta diversity metrics
+
+#Load data
 library(tidyverse)
-library(cluster)
-library(reshape2)
-library(ggbeeswarm)
-library(lme4)
-library(fitdistrplus)
-library(optimx)
 Pondtraitmeans <- read.csv("Data/Pondtraitmeans.csv")
 Timekey <- read.csv("Data/Timekey.csv")%>%
   mutate_at(vars(year, season, time), as.factor)%>%
@@ -12,27 +9,30 @@ Timekey <- read.csv("Data/Timekey.csv")%>%
 
 
 #Calculate a distance matrix of the pond level average trait values and convert to a usable data frame
-
+library(cluster)
 Distmat <- Pondtraitmeans%>%
   column_to_rownames("ID")%>% #Daisy function requires nxp matrix.  Identity values moved to row names to be preserved
   daisy(metric="gower",stand=T)
 
 #Convert the distance matrix to a data frame.  Need to distinguish between the time values of the two samples used for each pariwise combo
+#Var1 and Var2 are the united predator, time ID, and pond ID for the two ponds compared. These will be separated to individual columns
+library(reshape2)
 Allpairdist <- Distmat%>%
-  as.matrix()%>%
-  melt()%>%
+  as.matrix()%>% 
+  melt()%>% #Convert to a data frame
   separate(Var1, c("dompred1","time1","Pondnum1"))%>%
   separate(Var2, c("dompred2","time2","Pondnum2"))%>%
-  filter(Pondnum1 >= Pondnum2)%>% #This gets rid of one  of the triangle
+  filter(Pondnum1 >= Pondnum2)%>% #This gets rid of duplicates
   dplyr::rename("distance" = value)%>%
   mutate_at(vars(dompred1, dompred2, time1, time2, Pondnum1, Pondnum2), as.factor)%>%
   mutate(dompred2 = factor(dompred2, levels = c("N", "S", "G", "B")))%>% #reorder predator levels for graphing later
   mutate(dompred1 = factor(dompred1, levels = c("N", "S", "G", "B")))
 
-write.csv(Allpairdist, "Data/Allpairdist.csv", row.names = F) 
+#Uncomment to save
+#write.csv(Allpairdist, "Data/Allpairdist.csv", row.names = F) 
 
-#From the all-pairwise dataset, the comparisons between ponds of the same predator type, year, and season were selected for the spatial beta diversity analysis
 
+#From the all-pairwise dataset, the comparisons between ponds of the same predator type, year, and season are selected here for the spatial beta diversity analysis
 
 Spatialbeta <- Allpairdist %>%
   filter(time2 == time1, dompred1 == dompred2, Pondnum1 != Pondnum2)%>%
@@ -42,194 +42,30 @@ Spatialbeta <- Allpairdist %>%
   dplyr::select(-c("dompred2","time2"))%>%
   mutate(season = factor(season, levels = c("W", "Sp", "Su", "F"))) #Reorder season levels for graphing
 
-#Some exploratory data visualization.  
-
-Spatialbeta %>%
-  ggplot(aes(x = dompred, y = distance)) +
-  geom_beeswarm() +
-  facet_wrap(~season) +
-  theme_classic()
-Spatialbeta %>%
-  ggplot(aes(x = dompred, y = distance)) +
-  geom_beeswarm() +
-  facet_wrap(~year:season) +
-  theme_classic()
-
-#First I conducted a general linear model.  
-
-Spatialbetalmer <- lmer(distance~ dompred + year + season + dompred:year + dompred:season + 
-                          (1|Pondnum1) + (1|Pondnum2), Spatialbeta)
-
-#Assumption checking demonstrated deviations from normality and heteroscedasicity.
-
-plot(Spatialbetalmer)
-qqnorm(resid(Spatialbetalmer))
-qqline(resid(Spatialbetalmer))
-
-#Look at the variance by factor
-
-plot(Spatialbeta$dompred, resid(Spatialbetalmer))
-plot(Spatialbeta$year, resid(Spatialbetalmer))
-plot(Spatialbeta$season, resid(Spatialbetalmer))
-
-#The variances by factor don't look too bad.
 
 
 
-#I'll try fitdistrplus to see what the distribution is closest to.
+#Gamma glm. Adding a small value to the response variable so there are no zeroes to fit the distribution.
 
-
-descdist(Spatialbeta$distance)
-
-
-#Looks like beta or gamma.  Going with gamma
-
-
-
-
-#Here's the glm with gamma function.  Since the response has zero's, I'll add a small value to them.
-
+library(lme4)
+library(optimx)
 Spatialbetagamma <- glmer(distance ~ dompred + season + year + dompred:year + dompred:season + 
                           (1|Pondnum1) + (1|Pondnum2), 
                           transform(Spatialbeta, distance = distance + 0.0001), family = "Gamma",
                           control = glmerControl(optimizer = "optimx", optCtrl = list(method= "bobyqa")))
 
-plot(Spatialbetagamma)
-qqnorm(resid(Spatialbetagamma))
-qqline(resid(Spatialbetagamma))
+library(car)
 Anova(Spatialbetagamma, type = 3)
 
 
-
-#Fit looks much better
-
 #Generate the estimated marginal means
 library(emmeans)
-#Spatial.dompred.posthoc <- emmeans(Spatialbetagamma, pairwise ~ dompred, type = "response")
-#Spatial.year.posthoc <- emmeans(Spatialbetagamma, pairwise ~ dompred|year, type="response")
-Spatial.season.posthoc <- emmeans(Spatialbetagamma, pairwise ~ dompred|season,type="response")  
-
-#Spatial.all.posthoc <- emmeans(Spatialbetagamma, pairwise ~ dompred|year|season, type = "response")
-
-Spatial.emmeans <- Spatial.season.posthoc$emmeans%>%
+Spatial.posthoc <- emmeans(Spatialbetagamma, pairwise ~ dompred|season,type="response")  
+Spatial.emmeans <- Spatial.posthoc$emmeans%>%
   as.data.frame()
 
-write.csv(as.data.frame(Spatial.emmeans), "Data/Spatial.emmeans.csv", row.names = F)
-
-
-#Ok I got the emmeans and contrasts.  Now to graph it.  Not too sure how best to visualize it. I'll start with a figure with pred on x axis grouped by season
-
-#colorblind friendly palet 
-cbPalette <- c("#CC79A7", "#E69F00", "#009E73","#56B4E9")
-
-Spatial.dompred.plot <- Spatial.emmeans%>%
-  ggplot(aes(x = dompred, y = response, color = season)) +
-  geom_point(position = position_dodge(width = 0.3), size = 7) +
-  geom_line(aes(group = season), position = position_dodge(width = 0.3), linewidth = 0.5) +
-  geom_linerange(aes(ymin = asymp.LCL, ymax = asymp.UCL),
-                 position = position_dodge(width = 0.3), size = 0.5) +
-  theme_classic() +
-  labs(x = "Top Predator", 
-              y = expression(paste("Spatial Dissimilarity (",beta," diversity)")),
-              color = "Season") +
-         #scale_color_manual(labels = c("W","Sp","Su","F"),
-                              #values=cbPalette) +
-         scale_x_discrete(labels=c("N","S","G","B")) +
-         theme(#legend.key.height = unit(0.9,"cm"), 
-               #legend.key.width = unit(0.9,"cm"),
-               #legend.text = element_blank(),
-               legend.title = element_blank(),
-               #legend.position = "top",,
-               #legend.position = c(0.7,0.95),
-               #legend.justification=c(0,0.9),
-               axis.title= element_text(size=18),
-               axis.text = element_text(size=16))
-
-saveRDS(Spatial.dompred.plot, "Figures/Spatial.dompred.plot.rds")
-
-
-#Group by season
-Spatial_season_plot <-as.data.frame(Spatial.posthoc.season$emmeans) %>%
-  ggplot(aes(x=season, y=response, color=dompred))+
-  geom_point(position=position_dodge(width=0.3),size=7)+
-  geom_line(aes(group=dompred),position=position_dodge(width=0.3),size=0.5)+
-  geom_linerange(aes(ymin=asymp.LCL, ymax= asymp.UCL),
-                 position=position_dodge(width=0.3),size=0.5) +
-  theme_classic() +
-  labs(x = "Season", 
-       y = expression(paste("Spatial Dissimilarity (",beta," diversity)")),
-       color = "Top predator") +
-  scale_color_manual(labels = c("Invertebrate","Salamander","Sunfish","Bass"),
-                     values=cbPalette) +
-  scale_x_discrete(labels=c("Winter","Spring","Summer","Fall")) +
-  theme(#legend.key.height = unit(0.9,"cm"), 
-    #legend.key.width = unit(0.9,"cm"),
-    #legend.text = element_blank(),
-    legend.title = element_blank(),
-    #legend.position = "top",,
-    #legend.position = c(0.7,0.95),
-    #legend.justification=c(0,0.9),
-    axis.title= element_text(size=18),
-    axis.text = element_text(size=16))
-ggsave("Figures/Spatial_season_plot.tiff")
-#Now year
-
-#Group by year
-Spatial_year_plot<-as.data.frame(Spatial.posthoc.year$emmeans) %>%
-  ggplot(aes(x=year, y=response, color=dompred))+
-  geom_point(position=position_dodge(width=0.3),size=7)+
-  geom_line(aes(group=dompred),position=position_dodge(width=0.3),size=0.5)+
-  geom_linerange(aes(ymin=asymp.LCL, ymax= asymp.UCL),
-                 position=position_dodge(width=0.3),size=0.5) +
-  theme_classic() +
-  labs(x = "Year", 
-       y = expression(paste("Spatial Dissimilarity (",beta," diversity)")),
-       color = "Top predator") +
-  scale_color_manual(labels = c("Invertebrate","Salamander","Sunfish","Bass"),
-                     values=cbPalette) +
-  theme(legend.key.height = unit(0.9,"cm"), 
-        legend.key.width = unit(0.9,"cm"),
-        legend.text = element_text(size = 12),
-        legend.title = element_text(size =14),
-        legend.position = c(0.7,0.95),
-        legend.justification=c(0,0.9),
-        axis.title= element_text(size=18),
-        axis.text = element_text(size=16))
-ggsave("Figures/Spatial_year_plot.tiff")
-
-
-#Plot of every year x season combo
-
-Spatial_all_plot <-Spatial.posthoc.all$emmeans%>%
-  as.data.frame()%>%
-  left_join(Timekey, by=c("year","season"),na.rm=T)%>%
-  na.omit()%>%
-  ggplot(aes(x=as.factor(time), y=response, color=dompred))+
-  geom_point(position=position_dodge(width=0.3),size=5)+
-  geom_line(aes(group=dompred),position=position_dodge(width=0.3),size=0.5)+
-  geom_linerange(aes(ymin=asymp.LCL, ymax= asymp.UCL),
-                 position=position_dodge(width=0.3),size=0.5) +
-  theme_classic() +
-  labs(x = element_blank(),
-       y = expression(paste("Spatial Dissimilarity (",beta," diversity)")),
-       color = "Top predator") +
-  scale_color_manual(labels = c("Invertebrate","Salamander","Sunfish","Bass"),
-                     values=cbPalette) +
-  scale_x_discrete(labels=Timekey$season_year)+
-  theme(legend.key.height = unit(0.9,"cm"), 
-        legend.key.width = unit(0.9,"cm"),
-        legend.text = element_text(size = 8),
-        legend.title = element_text(size =10),
-        legend.position = c(0.7,1.05),
-        legend.justification=c(0,1.05),
-        axis.title= element_text(size=14),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(angle = 45, hjust = 1))
-
-ggsave("Figures/Spatial_all_plot.tiff")
-
-
-
+#Uncomment to save
+#write.csv(Spatial.emmeans, "Data/Spatial.emmeans.csv", row.names = F)
 
 
 
@@ -253,7 +89,7 @@ spbeta.rand <- tibble(pondnum1 = factor(),
 
 for(i in 1:numsim){
   samponds <- DomPredata%>%
-    filter(dompred != "O")%>% 
+    filter(dompred != "O")%>% #Don't include the ponds with "other" top predators
     group_by(dompred)%>%
     sample_n(n)
   
@@ -266,56 +102,5 @@ for(i in 1:numsim){
 
 
 
-#Save the data
-write.csv(spbeta.rand, "Data/spbeta.rand.csv", row.names = F)
-
-#Graph distribution of mean values by dompred
-spbeta.rand%>%
-  group_by(dompred, sim)%>%
-  dplyr::summarise(mean.dist = mean(distance))%>%
-  ggplot(aes(x = dompred, y = mean.dist, color = dompred)) +
-  geom_violin(aes(fill = dompred)) +
-  theme_classic() +
-  scale_color_manual(values=cbPalette) +
-  scale_fill_manual(values = cbPalette) +
-  theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
-  ggtitle("Randomized Spatial Dissimilarity") +
-  labs(x = "Predator", 
-       y = "Mean Spatial Dissimilarity") 
-
-#Graph distribution of mean values by dompred*season
-spbeta.rand%>%
-  group_by(dompred, season, sim)%>%
-  dplyr::summarise(mean.dist = mean(distance))%>%
-  ggplot(aes(x = dompred, y = mean.dist, color = dompred)) +
-  geom_violin(aes(fill = dompred)) +
-  theme_classic() +
-  scale_color_manual(values=cbPalette) +
-  scale_fill_manual(values = cbPalette) +
-  theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
-  #ggtitle("Randomized Spatial Dissimilarity") +
-  labs(x = "Predator", 
-       y = "Mean Spatial Dissimilarity") +
-  facet_grid(.~season)
-
-ggsave("Figures/Spatial_rand.tiff")
-#Graph distribution of mean values by dompred*year
-spbeta.rand%>%
-  group_by(dompred, year, sim)%>%
-  dplyr::summarise(mean.dist = mean(distance))%>%
-  ggplot(aes(x = dompred, y = mean.dist, color = dompred)) +
-  geom_violin(aes(fill = dompred)) +
-  theme_classic() +
-  scale_color_manual(values=cbPalette) +
-  scale_fill_manual(values = cbPalette) +
-  theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
-  #ggtitle("Randomized Spatial Dissimilarity") +
-  labs(x = "Predator", 
-       y = "Mean Spatial Dissimilarity") +
-  facet_grid(.~year)
-
-
-
-
-
-
+#Uncomment to save the data
+#write.csv(spbeta.rand, "Data/spbeta.rand.csv", row.names = F)

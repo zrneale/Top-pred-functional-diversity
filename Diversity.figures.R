@@ -1,13 +1,11 @@
+#This file creates the figures of observed and randomized diversity metrics
 
+
+#Load data sets for the observed diversity results
 library(tidyverse)
-library(ggpubr)
-
-
-#Data sets for the observed diversity results
-
 FDis.emmeans <- read.csv("Data/FDis.emmeans.csv")%>%
   mutate(dompred = fct_relevel(dompred, c("N", "S", "G", "B")),
-         season = fct_relevel(season, c("W", "Sp", "Su", "F", "Mean")))
+         season = fct_relevel(season, c("W", "Sp", "Su", "F")))
 
 Spatial.emmeans <- read.csv("Data/Spatial.emmeans.csv")%>%
   mutate(dompred = fct_relevel(dompred, c("N", "S", "G", "B")),
@@ -49,17 +47,12 @@ Textsize <- theme(legend.text = element_text(size = 12),
 
 
 #Alpha diversity plot
-
-#I'm going to represent predator means as horizontal lines rather than points. Here's a go at that
-
-
-Alpha.plot <- FDis.emmeans%>%
-  filter(season != "Mean")%>%
+Alpha.plot  <- FDis.emmeans%>%
   ggplot(aes(x = dompred, y = emmean, color = season))+
-  geom_point(position=position_dodge(width=0.5),size=5)+
+  geom_point(position=position_dodge(width=0.5), size=5)+
   geom_line(aes(group = season), position=position_dodge(width=0.5), linewidth=0.5) +
-  geom_linerange(aes(ymin=lower.CL, ymax= upper.CL),
-                 position=position_dodge(width=0.5),size=0.5) +
+  geom_linerange(aes(ymin = lower.CL, ymax = upper.CL),
+                 position = position_dodge(width = 0.5), linewidth=0.5) +
   stat_summary(fun = "mean", geom = "point", color = "black", alpha = 0.6, shape = 17, size = 3) + 
   theme_classic() +
   labs(x = "Top predator",
@@ -74,12 +67,11 @@ Alpha.plot <- FDis.emmeans%>%
 #Spatial beta plot
 
 Spatial.plot <- Spatial.emmeans%>%
-  filter(season != "Mean") %>%
   ggplot(aes(x = dompred, y = response, color = season), data = .) +
   geom_point(position = position_dodge(width = 0.5), size = 5) +
   geom_line(aes(group = season), position = position_dodge(width = 0.5), linewidth = 0.5) +
   geom_linerange(aes(ymin = asymp.LCL, ymax = asymp.UCL),
-                 position = position_dodge(width = 0.5), size = 0.5) +
+                 position = position_dodge(width = 0.5), linewidth = 0.5) +
   stat_summary(fun = "mean", geom = "point", color = "black", alpha = 0.6, shape = 17, size = 3) + 
   theme_classic() +
   labs(x = "Top Predator", 
@@ -95,13 +87,12 @@ Spatial.plot <- Spatial.emmeans%>%
 #Temporal beta plot
 
 Temporal.plot <- Temporal.emmeans%>%
-  filter(season != "Mean")%>%
   data.frame()%>%
   ggplot(aes(x = dompred, y = response, color = season)) +
   geom_point(position = position_dodge(width = 0.5), size = 5) +
   geom_line(aes(group = season), position = position_dodge(width = 0.5), linewidth = 0.5) +
   geom_linerange(aes(ymin = asymp.LCL, ymax = asymp.UCL),
-                 position = position_dodge(width = 0.5), size = 0.5) +
+                 position = position_dodge(width = 0.5), linewidth = 0.5) +
   stat_summary(fun = "mean", geom = "point", color = "black", alpha = 0.6, shape = 17, size = 3) + 
   theme_classic() +
   labs(x = "Top Predator", 

@@ -2,8 +2,11 @@
 #Here I calculate the local (alpha) functional diversity of dragonfly communities in ponds with different top predators - invertebrates, salamanders, green sunfish, and largemouth bass. I'll try three 
 
 #Load data
+
 library(tidyverse)
-Traitaverage <- read.csv("Data/Traitaverage.csv")
+Traitaverage <- read.csv("Data/Traitaverage.csv")%>%
+  column_to_rownames("spID")#Assign the spID column to row names for the FD function
+
 AbundancewideFD <- read.csv("Data/AbundancewideFD.csv")
 Pondata <- read.csv("Data/Pondata.csv")%>%
   mutate_at(vars(Pondnum, depthcon, veg, wood, canopy, substrate, litter), as.factor)
@@ -20,9 +23,6 @@ AbundancewideFD <- AbundancewideFD%>%
   filter(sum(c_across(Ajun:Tramea))>=3)%>% #Remove samples with fewer than 3 observations to reduce biased averages.
   column_to_rownames("ID")
 
-#spID column in Traitaverage needs to be assigned to row names and removed
-Traitaverage <- Traitaverage%>%
-  column_to_rownames("spID")
 
 #Calculate FD metrics
 library(FD)
@@ -57,24 +57,17 @@ dredge(model, beta = "none")
 FDislmer <- lmer(FDis ~ dompred + year + season + dompred:year + dompred:season  +  (1|Pondnum), FDistance)
 
 library(car)
+Anova(FDislmer, type = 3)
 #Post-hoc to generate estimated marginal means (emmeans)
 
-#Predator means across seasons
-FDis.dompred.posthoc <-emmeans(FDislmer,pairwise~dompred)
-FDis.dompred.emmeans <- as.data.frame(FDis.dompred.posthoc$emmeans)%>%
-  dplyr::mutate("LowerSE" = emmean-SE,"UpperSE"=emmean+SE)
-
-#Season-specific predator averagres
-FDis.season.posthoc <- emmeans(FDislmer,pairwise~season*dompred)
-FDis.season.emmeans <- as.data.frame(FDis.season.posthoc$emmeans)%>%
+#Season-specific predator averages
+FDis.posthoc <- emmeans(FDislmer,pairwise~season*dompred)
+FDis.emmeans <- as.data.frame(FDis.season.posthoc$emmeans)%>%
   dplyr::mutate("LowerSE" = emmean-SE,"UpperSE"=emmean+SE)
 
 
-#Save emmeans for graphing in a separate workbook
-FDis.dompred.emmeans%>%
-  mutate(season = "Mean")%>% 
-  rbind(FDis.season.emmeans)%>% 
-  write.csv("Data/FDis.emmeans.csv", row.names = F)
+#Uncomment to save data for graphing in another r file
+#Write.csv(FDis.emmeans,"Data/FDis.emmeans.csv", row.names = F)
 
 
 #Run the analysis with resampled data to make sure sample sizes aren't influencing our results
