@@ -16,12 +16,14 @@ Timekey <- read.csv("Data/Timekey.csv", header = T)%>%
 #All pairwise distances between pond level trait averages were calculated in the spatial beta code. Here I select just the pairwise distances I want for the temporal beta diversity - comparisons between ponds and themselves in the next time step.
 
 Temporalbeta <- Allpairdist%>%
+  mutate_at(vars(time1, time2, distance), as.numeric)%>%
   filter(Pondnum1 == Pondnum2, time1 == time2 + 1)%>% #Restrict to distances between ponds and themselves one timestep in future
   dplyr::select(Pondnum1, dompred1, time1, time2, distance)%>% #pondnum's and dompred's 1 vs 2 are duplicates in each pairwise distance
   dplyr::rename("Pondnum" = Pondnum1, "dompred" = dompred1)%>%
   mutate(dompred = factor(dompred, levels = c("N", "S", "G", "B")))%>%
   left_join(Timekey,by = c("time1" = "time"))
   
+
 
 #Recode the season levels to reflect the fact they are similarities between two different seasons
 Temporalbeta$season <- recode_factor(Temporalbeta$season, "W" = "W_Sp", "Sp" = "Sp_Su", "Su" = "Su_F", "F" = "F_W")

@@ -100,7 +100,5 @@ for(i in 1:numsim){
   
 }
 
-
-
 #Uncomment to save the data
 #write.csv(spbeta.rand, "Data/spbeta.rand.csv", row.names = F)

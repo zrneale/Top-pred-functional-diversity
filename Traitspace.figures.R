@@ -1,8 +1,8 @@
 
+#This file plots pond data on PCoA axes and visualizes mean trait values
+
+#Load data
 library(tidyverse)
-library(ape)
-library(cluster)
-library(ggrepel)
 Finaldata <- read.csv("Data/Finaldata.csv")%>%
   mutate_at(vars(year), as.factor)%>%
   mutate(season = factor(season, levels = c("W", "Sp", "Su", "F")))%>% #Reorder for graphing
@@ -10,15 +10,16 @@ Finaldata <- read.csv("Data/Finaldata.csv")%>%
 Traitaverage <- read.csv("Data/Traitaverage.csv")%>%
   column_to_rownames("spID")
 Taxonomy <- read.csv("Data/taxonomy.csv")
+
+
 #Conduct a PCoA on the spID traits. PCoA was chosen because it's the method used in calculating FDis
 
+library(cluster)
+spdist <- daisy(Traitaverage, metric = "gower", stand = T) #Create a distance matrix for the PCoA
 
-##Need a distance matrix first
-spIDdist <- daisy(Traitaverage, metric = "gower", stand = T)
-PCOA <- pcoa(spIDdist, correction = "none")
-biplot(PCOA, plot.axes = c(1,2))
+PCOA <- pcoa(spdist, correction = "none")
 
-#Create data set containing the points on the first two axes for each spID and attach the spID labels from the taxonomy data set
+#Create data set containing the points on the first two axes for each species and attach the spID labels from the taxonomy data set
 pcoadf <- PCOA$vectors%>%
   data.frame()%>%
   rownames_to_column(var = "spID")%>%
@@ -27,6 +28,7 @@ pcoadf <- PCOA$vectors%>%
 #write.csv(pcoadf, "pcoa.df.csv")
 
 #Publication-quality plot of each spID in PCOA space
+library(ggrepel)
 pcoadf%>%
   ggplot(aes(x = Axis.1, y = Axis.2)) +
     geom_point(size = 2) +
@@ -65,6 +67,8 @@ Averageordi2 <- Averageordi%>%
 
 ##Extract and plot vector loadings using function from https://gist.github.com/Rekyt/ee15330639f8719d87aebdb8a5b095d4
 
+library(ape)
+
 compute_arrows = function(given_pcoa, trait_df) {
   
   # Keep only quantitative or ordinal variables
@@ -99,7 +103,8 @@ trait_loadings <- compute_arrows(PCOA, data.frame(apply(Traitaverage, 2, scale, 
 arrows_df = as.data.frame(trait_loadings$U)%>%
   rownames_to_column("variable")
 
-#Make plots First I'll create the PCOA loadings to be inserted as insets, then I'll make the traitspace figures
+#Make plots 
+#First create the PCOA loadings to be inserted as insets
 
 #colorblind friendly palette when faceting by season 
 seasonPalette <- c('#EE6677', '#228833', '#4477AA', '#CCBB44', "grey35")
@@ -149,8 +154,8 @@ Averageordi2%>%
          shape = guide_legend(order = 2))
 
 
-#Save
-ggsave("Figures/Traitspace.dompred.tiff", width = 15.32, height = 9.34)
+#Uncomment to save
+#ggsave("Figures/Traitspace.dompred.jpg", width = 15.32, height = 9.34)
 
 #Facet by season
 Averageordi2%>%
@@ -177,22 +182,8 @@ Averageordi2%>%
          shape = guide_legend(order = 2))
 
 #Save
-ggsave("Figures/Traitspace.season.tiff", width = 15.32, height = 9.34)
+#ggsave("Figures/Traitspace.season.jpg", width = 15.32, height = 9.34)
 
-
-#Facet by year
-Averageordi2%>%
-  ggplot(aes(x=meanAxis1,y=meanAxis2))+
-  geom_point(aes(color = dompred, shape=season))+
-  geom_polygon(aes(color = dompred),alpha=0.1)+
-  facet_wrap(~year) + 
-  scale_color_manual(values=cbPalette) +
-  scale_fill_manual(values = cbPalette, guide = NULL) +
-  labs(color = "dompred") +
-  theme_classic() 
-
-#Un-comment to save
-#ggsave("Figures/Traitspace.dompred.season.tiff")
 
 
 #Plot averages of single traits to see if the vector loadings make sense. I'm going to try having one figure with separate panels for each trait. I'll need to convert the data to long form, group by pred and trait, and then summarize to calculate mean and SE. This will go in the supplement so I'm going to have separate figures for each season.
@@ -213,12 +204,12 @@ PlotTraits <- function(seas){
     geom_point(size = 5) +
     geom_linerange(aes(ymin = traitmean - se, ymax = traitmean + se), size = 1) +
     #geom_beeswarm(data = filter(Traitslong, season == "W"), aes(x = dompred, y = value)) + #For some reason this won't run
-facet_wrap(vars(trait), scales = "free_y") +
-  scale_color_manual(values = predPalette) +
-  labs(x = "Top Predator", y = "Trait mean (mm) +/- SE") +
-  scale_x_discrete(labels = c("Inv", "Sal", "Sun", "Bass")) +
-  theme_classic() +
-  theme(legend.position = "none",
+    facet_wrap(vars(trait), scales = "free_y") +
+    scale_color_manual(values = predPalette) +
+    labs(x = "Top Predator", y = "Trait mean (mm) +/- SE") +
+    scale_x_discrete(labels = c("Inv", "Sal", "Sun", "Bass")) +
+    theme_classic() +
+    theme(legend.position = "none",
         axis.title = element_text(size = 20),
         axis.text = element_text(size = 16),
         strip.text = element_text(size = 16)) 
@@ -231,7 +222,8 @@ PlotTraits("W") +
   ggtitle("Winter") +
   theme(plot.title = element_text(size = 20, face = "bold"))
 
-ggsave("Figures/traits.winter.tiff", width = 10.19, height = 9.19)
+#Uncomment to save
+#ggsave("Figures/traits.winter.tiff", width = 10.19, height = 9.19)
 
 
 #Plot spring traits
@@ -239,7 +231,8 @@ PlotTraits("Sp") +
   ggtitle("Spring") +
   theme(plot.title = element_text(size = 20, face = "bold"))
 
-ggsave("Figures/traits.spring.tiff", width = 10.19, height = 9.19)
+#Uncomment to save
+#ggsave("Figures/traits.spring.tiff", width = 10.19, height = 9.19)
 
 
 #Plot summer traits
@@ -247,13 +240,15 @@ PlotTraits("Su") +
   ggtitle("Summer") +
   theme(plot.title = element_text(size = 20, face = "bold"))
 
-ggsave("Figures/traits.summer.tiff", width = 10.19, height = 9.19)
+#Uncomment to save
+#ggsave("Figures/traits.summer.tiff", width = 10.19, height = 9.19)
 
 #Plot fall traits
 PlotTraits("F") +
   ggtitle("Fall") +
   theme(plot.title = element_text(size = 20, face = "bold"))
 
-ggsave("Figures/traits.fall.tiff", width = 10.19, height = 9.19)
+#Uncomment to save
+#ggsave("Figures/traits.fall.tiff", width = 10.19, height = 9.19)
 
 

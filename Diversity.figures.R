@@ -112,7 +112,9 @@ Alpha.spatial.plot <- ggarrange(Alpha.plot, Spatial.plot, common.legend = T, leg
 
 #Add the temporal plot
 ggarrange(Alpha.spatial.plot, Temporal.plot, common.legend = F, ncol = 1, heights = c(2,1))
-ggsave("Figures/Diversity.combined.figure.jpg", width = 7.33, height = 9.19)
+
+#Uncomment to save
+ggsave("Figures/Diversity.combined.figure.tiff", width = 7.33, height = 9.19)
 
 
 ####Randomization data plots
@@ -180,7 +182,7 @@ Temporal.rand.plot <-tempbeta.rand%>%
   theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
   #ggtitle("Randomized Spatial Dissimilarity") +
   labs(x = "Predator", 
-       y = "Mean Spatial Dissimilarity") +
+       y = "Mean Temporal Dissimilarity") +
   facet_grid(.~season, labeller = labeller(season = c("W_Sp" = "Winter_Spring", 
                                                       "Sp_Su" = "Spring_Summer", 
                                                       "Su_F" = "Summer_Fall", 
@@ -196,4 +198,5 @@ Temporal.rand.plot <-tempbeta.rand%>%
 ggarrange(Alpha.rand.plot, Spatial.rand.plot, Temporal.rand.plot, common.legend = T, 
           legend = "right", ncol = 1)
 
-ggsave("Figures/Diversity.rand.combined.jpg", width = 7.33, height = 9.19)
+#Uncomment to save
+#ggsave("Figures/Diversity.rand.combined.tiff", width = 7.33, height = 9.19)

@@ -67,7 +67,7 @@ FDis.emmeans <- as.data.frame(FDis.season.posthoc$emmeans)%>%
 
 
 #Uncomment to save data for graphing in another r file
-#Write.csv(FDis.emmeans,"Data/FDis.emmeans.csv", row.names = F)
+#write.csv(FDis.emmeans,"Data/FDis.emmeans.csv", row.names = F)
 
 
 #Run the analysis with resampled data to make sure sample sizes aren't influencing our results
@@ -99,5 +99,5 @@ for(i in 1:numsim){
 
 
 #Save the randomized data set
-write.csv(FDis.rand, "Data/FDis.rand.csv", row.names = F)
+#write.csv(FDis.rand, "Data/FDis.rand.csv", row.names = F)
 

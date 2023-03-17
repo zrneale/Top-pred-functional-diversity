@@ -57,6 +57,7 @@ Traitaverage[22,17] <- "incesta"
 Traitaverage[22,18] <- "Libellula"
 Traitaverage[22,19] <- "Libellula spp."
 
+
 #Gomphus lividus only had 1 sample from which the size measurement was taken.  Here I check to see how many samples contained this species and how many other species were included in those samples
 
 GomphAbundata <- Abundata%>%
