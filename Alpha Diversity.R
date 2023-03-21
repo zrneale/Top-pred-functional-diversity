@@ -1,5 +1,6 @@
 
-#Here I calculate the local (alpha) functional diversity of dragonfly communities in ponds with different top predators - invertebrates, salamanders, green sunfish, and largemouth bass. I'll try three 
+#This file calculates and analyzes the local (alpha) functional diversity.
+
 
 #Load data
 
@@ -11,7 +12,7 @@ AbundancewideFD <- read.csv("Data/AbundancewideFD.csv")
 Pondata <- read.csv("Data/Pondata.csv")%>%
   mutate_at(vars(Pondnum, depthcon, veg, wood, canopy, substrate, litter), as.factor)
 Timekey <- read.csv("Data/Timekey.csv")
-DomPredata <- read.csv("Data/PredType2.csv")
+
 
 
 
@@ -85,7 +86,8 @@ FDis.rand <- tibble(Pondnum = factor(),
 
 #Run the randomization. 
 for(i in 1:numsim){
-  samponds <- DomPredata%>%
+  samponds <- Pondata%>%
+    dplyr::select(c(pond, dompred, Pondnum))%>%
     filter(dompred != "O")%>% #Remove ponds with "other" dominant predators
     group_by(dompred)%>%
     sample_n(n)

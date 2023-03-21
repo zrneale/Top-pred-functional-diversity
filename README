@@ -1,0 +1,145 @@
+This README.txt file was updated on 21 March 2023 by Zoey Neale
+
+GENERAL INFORMATION
+
+1. Paper information
+Citation: Zoey Neale and Volker Rudolf. 2023. In preparation
+
+Abstract: Competition should play a key role in shaping community assembly and thereby local and regional biodiversity patterns. However, identifying its relative importance and effects in natural communities is challenging because theory suggest that competition can lead to different and even opposing patterns depending on the underlying mechanisms. Here, we’ve taken a different approach: rather than attempting to indirectly infer competition from diversity patterns, we compared trait diversity patterns in odonate (dragonfly and damselfly) communities across different spatial and temporal scales along a natural competition-predation gradient. At the local scale (within habitat), we found that trait diversity increased with size of top predators (from invertebrates to fish). This relationship is consistent with differences in taxonomic diversity, suggesting that competition reduces local trait diversity through competitive exclusion. Spatial (across communities) and temporal (within communities over time) trait variation peaked in communities with intermediated predators indicating that both high levels of competition or predation select for trait-convergence of communities. This indicates that competition acts as a deterministic force that reduce trait diversity at the local, regional, and temporal scale, which contrasts with patterns at taxonomic level. Overall, results from this “natural experiment” reveal how competition and predation interact to shape biodiversity patterns in natural communities across spatial and temporal scales and provides new insights into the underlying mechanisms. 
+
+2. Originators
+Neale, Zoey, Rice University. zoey.neale@rice.edu
+Rudolf, Volker, Rice University. vr2@rice.edu
+
+3. Contact information
+Volker Rudolf
+Department of Biosciences
+Rice University MS-140
+6100 Main St. Houston, TX 77005
+vr2@rice.edu
+
+4. Date of data collection:
+Summer 2008 - Fall 2011
+
+5. Geographic location of data collection:
+Kennard, TX
+
+6. Information about funding sources that supported the collection of the data:
+NSF DEB-1256860; DEB-0841686. Awarded to Volker Rudolf
+
+ACCESS INFORMATION
+
+1. Licenses/restrictions placed on the data: 
+None
+
+2. Data derived from other sources.
+None
+
+3. Recommended citation for this dataset: 
+
+
+DATA AND CODE FILE OVERVIEW
+This data repository contains 7 data files, 5 code scripts, and this README document, with the following data and code filenames and variables:
+
+Data files and variables
+1. AbundancewideFD.csv contains counts of each species of odonate within each sample. Variables:
+    ID - Identification for sample. Consists of dominant predator type, pond ID numbe, year, and season separated by periods. 
+        W = winter, Sp = spring, Su = summer, F = fall
+    Remaining columns contain numbers of each species observed in each sample. Headers contain the species ID's Key to species ID's is located in Taxonomy.csv
+  
+2. Finaldata.csv contains the long-form abundance data with species level traits values and pond characteristics. Variables:
+    Survey - survey identification number
+    pond - pond name
+    effort - amount of time sampling (in minutes)
+    dry - Yes/no indicating whether pond was dry at the time of sample
+    perm - permance of pond. P = permenant, S = semipermanant, T = temporary
+    season - season sample was collected. W = winter, Sp = spring, Su = summer, F = fall
+    month - month sample was collected
+    Year - year sample was collected
+    date - date sample was collected
+    spID - ID of species. See Taxonomy.csv for taxonomy of corresponding species
+    Body_A is the body area of specimen
+    Body_L is the body length of specimen
+    Body_H is the body height of specimen
+    Eye_A is the eye area of specimen
+    Gape_W is the gape width of specimen
+    Head_W is the head width of specimen
+    InterEye_W is the length between eyes of specimen
+    Leg1st_L is the legth of the first pair of legs of specimens caught in sample
+    Leg3rd_L is the length of the third pair of legs of specimens caught in sample
+    InterLeg_W is the length between legs of specimens caught in sample
+    Thorax_W is the thorax width of specimens caught in sample
+    Mentum_L is the mentum length of specimens caught in sample
+    
+3. Pondata.csv contains habitat characeristcs of each pond. Variables:
+    pond is the name of the pond
+    dompred is the top predator. N = invertebrate, S = salamander, G = green sunfish, B = largemouth bass
+    Pondnum is the numeric ID of the pond
+    area is the area of the pond
+    depth is the depth of the pond's deepest point
+    veg is an estimation of the amount of vegetation. Ordinal categories are: <15%, 15-35%, 36-64%, 65-85%, >85%
+    canopy is an estimation of the amount of canopy cover over a pond. Ordinal categories are: <15%, 15-35%, 36-64%, 65-85%, >85%
+    
+    
+4. Pondtraitmeans.csv contains average trait values of specimens collected in each sample. Variables:
+    ID is the Top predator, Time ID, and Pond ID separated by periods
+    Body_A is the average body area of specimens caught in sample
+    Body_L is the average body length of specimens caught in sample
+    Body_H is the average body height of specimens caught in sample
+    Eye_A is the average eye area of specimens caught in sample
+    Gape_W is the average gape width of specimens caught in sample
+    Head_W is the average head width of specimens caught in sample
+    InterEye_W is the average length between eyes of specimens caught in sample
+    Leg1st_L is the average legth of the first pair of legs of specimens caught in sample
+    Leg3rd_L is the average length of the third pair of legs of specimens caught in sample
+    InterLeg_W is the average length between legs of specimens caught in sample
+    Thorax_W is the average thorax width of specimens caught in sample
+    Mentum_L is the average mentum length of specimens caught in sample
+    
+5. taxonomy.csv contains taxonomic information on the odonate species included in this study. Variables:
+    suborder is the suborder of the species
+    family is the family of the species
+    genus is the genus of the species
+    species is the species
+    spID is the ID assigned to the species
+    spLabel is the abreviated genus and species
+    latin is the full genus and species combined
+6. Timekey.csv contains the unique ID number given to each season, year combination. Variables:
+    Season_year is the season and year separated by _
+    year is the year
+    season is the season
+    time is the unique ID for the year x season combination
+    
+7. Traitaverage.csv contains the species-level average trait values. Variables:
+    Body_A is the body area 
+    Body_L is the body length
+    Body_H is the body height
+    Eye_A is the eye area
+    Gape_W is the gape width
+    Head_W is the head width
+    InterEye_W is the length between eyes
+    Leg1st_L is the legth of the first pair of legs of specimens
+    Leg3rd_L is the length of the third pair of legs of specimens
+    InterLeg_W is the length between legs of specimens
+    Thorax_W is the thorax width of specimens
+    Mentum_L is the mentum length of specimens
+    spID is the ID assigned to the species
+    
+  Code scripts and workflow:
+  
+  1. Alpha Diversity.R caculates alpha diversity metrics, runs analysis, and creates randomized dataset
+  
+  2. Spatial Beta.R calculates spatial beta diversity metrics, runs analysis, and creates randomized dataset
+  
+  3. Temporal Beta.R calculates temporal beta diversity metrics, runs analysis, and creates randomized dataset
+  
+  4. Diversity.figures.R creates the observed and simulated diversity metric figures. Data output by Alpha Diversity.R, Spatial Beta.R, and        Temporal Beta.R are required
+  
+  5. Traitspace.figures.R plots pond trait data on PCoA axes and visualizes mean trait values
+  
+  SOFTWARE VERSIONS:
+  R 4.2.2
+  
+  REFERENCES
+  None
+  
