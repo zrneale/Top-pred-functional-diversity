@@ -111,31 +111,38 @@ seasonPalette <- c('#EE6677', '#228833', '#4477AA', '#CCBB44', "grey35")
 #Colorblind friendly palette wheb faceting by predator
 predPalette <- c("#E69F00", "#56B4E9", "#009E73", "#D55E00")
 
+
+
+#Text sizes
+textsize <- theme(axis.title = element_text(size = 14),
+                  axis.text = element_text(size = 12),
+                  legend.text = element_text(size = 12),
+                  legend.title = element_text(size = 14),
+                  strip.text = element_text(size = 14))
 #Loading arrows plot
-Loadings <- arrows_df%>%
+loadings <- arrows_df%>%
   ggplot(aes(x=0, y =0, label = variable))+
   geom_segment(xend = arrows_df$Axis.1, yend = arrows_df$Axis.2, size = 0.1)+
   xlim(-5, 0) +
   ylim(-8, 10) +
   theme_classic() +
   geom_text_repel(data = arrows_df, inherit.aes = F, aes(x = Axis.1, y = Axis.2, label = variable),
-                  size = 2.5)+
+                  size = 4)+
   labs(x = paste0("PCOA Axis 1 (", round(trait_loadings$values$Relative_eig[1] * 100, 2), "%)"),
        y = paste0("PCOA Axis 2 (", round(trait_loadings$values$Relative_eig[2] * 100, 2), "%)")) + 
-  theme(axis.title = element_text(size = 8),
-        axis.text = element_text(size = 6))
+  textsize
 
 
 
 
+#Facet by dompred to focus on season
 
-#Facet by dompred
-Averageordi2%>%
+sTraitspace <- Averageordi2%>%
   ggplot(aes(x=meanAxis1,y=meanAxis2))+
-  layer(data = filter(Averageordi2, dompred == "G"), stat = StatIdentity, position = PositionIdentity, geom = ggplot2::GeomCustomAnn,
-        params = list(grob = ggplotGrob(Loadings), 
-                      xmin = -0.14, xmax = -.025,
-                      ymin = -.018, ymax = 0.04)) +
+  # layer(data = filter(Averageordi2, dompred == "G"), stat = StatIdentity, position = PositionIdentity, geom = ggplot2::GeomCustomAnn,
+  #       params = list(grob = ggplotGrob(Loadings), 
+  #                     xmin = -0.14, xmax = -.025,
+  #                     ymin = -.018, ymax = 0.04)) +
   geom_point(aes(color = season, shape=year), size = 2)+
   geom_polygon(aes(color = season, fill = season),alpha=0.1)+
   facet_wrap(~dompred, labeller =  as_labeller(c("N" = "Invertebrate", "S" = "Salamander", "G" = "Sunfish", "B" = "Bass"))) + 
@@ -143,27 +150,42 @@ Averageordi2%>%
   scale_fill_manual(values = seasonPalette, guide = NULL) +
   labs(color = "Season", shape = "Year") +
   theme_classic() +
-  theme(axis.title = element_text(size = 20),
-        axis.text = element_text(size = 16),
-        legend.text = element_text(size = 16),
-        legend.title = element_text(size = 20),
-        strip.text = element_text(size = 18)) +
   labs(x = paste0("PCOA Axis 1 (", round(trait_loadings$values$Relative_eig[1] * 100, 2), "%)"),
        y = paste0("PCOA Axis 2 (", round(trait_loadings$values$Relative_eig[2] * 100, 2), "%)")) +
   guides(color = guide_legend(order = 1),
-         shape = guide_legend(order = 2))
+         shape = guide_legend(order = 2)) +
+  textsize 
+
+#Extract the legend
+sLegend <- get_legend(sTraitspace + theme(legend.box = "horizontal",
+                                          legend.text = element_text(size = 14),
+                                          legend.title = element_text(size = 16)))
+
+#Add loadings plot to bottom of the PCOA plot
+library(cowplot)
+
+
+ggdraw() +
+  draw_plot(sTraitspace + theme(legend.position = "none"),
+            x = 0, y = 0.35, height = 0.65, width = 1) +
+  draw_plot(loadings, x = 0.032, y = 0, height = 0.35, width = 0.5)  +
+  draw_plot(sLegend, x = 0.5, y = 0.08, height = 0.2, width = 0.49)
+
 
 
 #Uncomment to save
-#ggsave("Figures/Traitspace.dompred.jpg", width = 15.32, height = 9.34)
+#ggsave("Figures/seasonTraitspace.tiff", width = 7.12, height = 9.34)
 
-#Facet by season
-Averageordi2%>%
+
+
+
+#Facet by season to focus on dominant predator
+pTraitspace <- Averageordi2%>%
   ggplot(aes(x=meanAxis1,y=meanAxis2))+
-  layer(data = filter(Averageordi2, season == "Su"), stat = StatIdentity, position = PositionIdentity, geom = ggplot2::GeomCustomAnn,
-        params = list(grob = ggplotGrob(Loadings), 
-                      xmin = -0.14, xmax = -.025,
-                      ymin = -.018, ymax = 0.04)) +
+  # layer(data = filter(Averageordi2, season == "Su"), stat = StatIdentity, position = PositionIdentity, geom = ggplot2::GeomCustomAnn,
+  #       params = list(grob = ggplotGrob(Loadings), 
+  #                     xmin = -0.14, xmax = -.025,
+  #                     ymin = -.018, ymax = 0.04)) +
   geom_point(aes(color = dompred, shape=year))+
   geom_polygon(aes(color = dompred, fill = dompred),alpha=0.1)+
   facet_wrap(~season, labeller = as_labeller(c("W" = "Winter", "Sp" = "Spring", "Su" = "Summer", "F" = "Fall"))) + 
@@ -171,18 +193,26 @@ Averageordi2%>%
   scale_fill_manual(values = predPalette, guide = NULL) +
   labs(color = "Top Predator", shape = "Year") +
   theme_classic() +
-  theme(axis.title = element_text(size = 20),
-        axis.text = element_text(size = 16),
-        legend.text = element_text(size = 16),
-        legend.title = element_text(size = 20),
-        strip.text = element_text(size = 18)) +
   labs(x = paste0("PCOA Axis 1 (", round(trait_loadings$values$Relative_eig[1] * 100, 2), "%)"),
        y = paste0("PCOA Axis 2 (", round(trait_loadings$values$Relative_eig[2] * 100, 2), "%)")) +
   guides(color = guide_legend(order = 1),
-         shape = guide_legend(order = 2))
+         shape = guide_legend(order = 2)) +
+  textsize
+
+#Extract season legend
+pLegend <- get_legend(pTraitspace + theme(legend.box = "horizontal",
+                                          legend.text = element_text(size = 14),
+                                          legend.title = element_text(size = 16)))
+
+#Combine the elements to create final figure
+ggdraw() +
+  draw_plot(pTraitspace + theme(legend.position = "none"),
+            x = 0, y = 0.35, height = 0.65, width = 1) +
+  draw_plot(loadings, x = 0.032, y = 0, height = 0.35, width = 0.5)  +
+  draw_plot(pLegend, x = 0.5, y = 0.08, height = 0.2, width = 0.49)
 
 #Save
-#ggsave("Figures/Traitspace.season.jpg", width = 15.32, height = 9.34)
+#ggsave("Figures/predTraitspace.tiff",  width = 7.12, height = 9.34)
 
 
 

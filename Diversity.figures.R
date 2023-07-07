@@ -105,7 +105,7 @@ Temporal.plot <- Temporal.emmeans%>%
   Textsize
 
 
-#I'm going to have one legend for the alpha and spatial beta plots and a separate one for the temporal beta. I think the best way to do this is to first make a combined plot for the first two sharing a legend, then combine that one with the temporal plot
+#There will be one legend for the alpha and spatial beta plots and a separate one for the temporal beta. IFirst make a combined plot for the first two sharing a legend, then combine that one with the temporal plot
 
 library(ggpubr)
 Alpha.spatial.plot <- ggarrange(Alpha.plot, Spatial.plot, common.legend = T, legend = "right", ncol = 1)
