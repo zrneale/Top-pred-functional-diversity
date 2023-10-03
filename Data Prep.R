@@ -58,7 +58,7 @@ Traitaverage[22,18] <- "Libellula"
 Traitaverage[22,19] <- "Libellula spp."
 
 
-#Gomphus lividus only had 1 sample from which the size measurement was taken.  Here I check to see how many samples contained this species and how many other species were included in those samples
+#Gomphus lividus only had 1 sample from which the size measurement was taken.  Check to see how many samples contained this species and how many other species were included in those samples
 
 GomphAbundata <- Abundata%>%
   filter(spID == "Gomphus lividus" & abundance >=1)%>%
@@ -74,7 +74,7 @@ Abundata%>%
   filter(dompred != "O")%>%
   view()
   
-#Gomphus was pretty rare, so I'll remove it from the analysis
+#Gomphus was pretty rare. Remove it from the analysis
 
 
 #Remove the other two species of Libellula and Gomphus lividus
@@ -83,7 +83,7 @@ Traitaverage <- filter(Traitaverage, latin != "Libellula vibrans"
                        & latin != "Gomphus lividus")%>%
   dplyr::select(-c(latin, suborder, family, genus, species, spLabel)) # Don't need these
 
-#Save Traitaverage file with rows arranged alphabetically. I'll need this file for the dbFD function
+#Save Traitaverage file with rows arranged alphabetically to be used in alpha diversity script
 Traitaverage%>%
   arrange(spID)%>%
   write.csv("Data/Traitaverage.csv",row.names = F)
@@ -136,7 +136,7 @@ AbundancewideFD <- dplyr::select(Abundancewide,-c(Gomphus.lividus,Arigomphus.len
 
 #For a couple of the analyses I'll need each season x year combination to be sequentially assigned a number.
 
-#I'll need to assign each year x season combo a unique number for a few things.
+#Assign each year x season combo a unique number for a few things.
 
 Timekey <- Finaldata%>%
   ungroup()%>%
